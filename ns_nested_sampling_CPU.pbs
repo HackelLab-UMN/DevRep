@@ -1,0 +1,10 @@
+#!/bin/bash -l
+#PBS -l walltime=24:00:00,nodes=1:ppn=8,mem=20gb
+#PBS -m abe
+#PBS -M joh14192@umn.edu
+
+module load conda
+source activate awg
+
+cd ./Developability
+python3 nested_sampling.py $PBS_ARRAYID
