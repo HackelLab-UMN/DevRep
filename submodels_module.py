@@ -23,12 +23,12 @@ class assay_to_x_model():
 class control_to_x_model():
     'sets get_input_seq to nothing, not sure if needed'
     def __init__(self):
-        self.get_input_seq=load_format_data.get_control 
+        self.get_input_seq=load_format_data.get_control
 
 class sequence_embedding_to_x_model():
     'sets get_input_seq to load the sequence embedding from a saved seq-to-assay model'
     def __init__(self):
-        self.get_input_seq=load_format_data.get_embedding 
+        self.get_input_seq=load_format_data.get_embedding
 
 class x_to_yield_model(model):
     'sets model output to yield'
@@ -37,7 +37,7 @@ class x_to_yield_model(model):
         self.get_output_and_explode=load_format_data.explode_yield
         self.plot_type=plot_model.x_to_yield_plot
         self.training_df=load_format_data.load_df('assay_to_dot_training_data')
-        self.testing_df=load_format_data.load_df('seq_to_dot_test_data') 
+        self.testing_df=load_format_data.load_df('seq_to_dot_test_data')
         self.lin_or_sig='linear'
         self.num_cv_splits=10
         self.num_cv_repeats=10
@@ -48,31 +48,46 @@ class x_to_yield_model(model):
         self.sample_seed=seed
         self.update_model_name('seed'+str(seed)+'_'+self.model_name)
 
-    def save_predictions(self,input_df_description=None):
+    def save_predictions(self, input_df_description=None, df=None, df_emb=False, sampling_nb=None):
         'saves model predictions for the large dataset'
+        # Inputs: input_df_description: input dataframe description
+        #         df: a dataframe for monte carlo sampling
+        #         df_emb: a boolean if df is just meant for monte carlo sampling
+        #         sampling_nb:
+        if input_df_description is None and df_emb is False:  # default for the non sampling case
+            input_df_description = 'seq_to_assay_train_'+self.assay_str #only a certain number of these files exist, but more can be created
+            df = load_format_data.load_df(input_df_description)  # will have to adjust if missing datapoints
+        elif df_emb is False:  # we are not doing sampling
+            df = load_format_data.load_df('predicted/' + input_df_description)  # for using predicted embeddings
+            x_a = self.get_input_seq(df)
+        else:  # this is for monte carlo sampling, df is a dataframe with attributes 'Ordinals' and
+            # 'learned_sampling_'sampling_nb''
+            x_a = self.get_input_seq(df, sampling_nb)
 
-        if not input_df_description:
-            input_df_description='seq_to_assay_train_'+self.assay_str #only a certain number of these files exist, but more can be created
-            df=load_format_data.load_df(input_df_description) 
-        else:
-            df=load_format_data.load_df('predicted/'+input_df_description) #for using predicted embeddings 
-
-        OH_matrix=np.eye(2)
-        matrix_col=['IQ_Average_bc','SH_Average_bc']
-        x_a=self.get_input_seq(df)
-        for z in range(1): #no of models
+        OH_matrix = np.eye(2)
+        matrix_col = ['IQ_Average_bc', 'SH_Average_bc']
+        for z in range(1):  # no of models
             self.load_model(z)
             for i in range(2):
-                cat_var=[]
+                cat_var = []
                 for j in x_a:
                     cat_var.append(OH_matrix[i].tolist())
-                x=load_format_data.mix_with_cat_var(x_a,cat_var)
-                df_prediction=self._model.model.predict(x).squeeze().tolist()
-                col_name=matrix_col[i]
-                df.loc[:,col_name]=df_prediction
-                col_name_std=matrix_col[i]+'_std'
-                df.loc[:,col_name_std]=[0]*len(df_prediction)
-            df.to_pickle('./datasets/predicted/'+input_df_description+'_'+self.model_name+'_'+str(z)+'.pkl')
+                x = load_format_data.mix_with_cat_var(x_a, cat_var)
+                df_prediction = self._model.model.predict(x).squeeze().tolist()
+                col_name = matrix_col[i]
+                df.loc[:, col_name] = df_prediction
+                col_name_std = matrix_col[i] + '_std'
+                df.loc[:, col_name_std] = [0] * len(df_prediction)
+            if df_emb:  # if this a monte carlo sampling call , return the averaged predictions for the model
+                return self.avg_prediction(df)
+            df.to_pickle('./datasets/predicted/' + input_df_description + '_' + self.model_name + '_' + str(z) + '.pkl')
+
+    def avg_prediction(self, df):
+        'load predictions and add the two cell types yield together'
+        predicted_iq_yield = df['IQ_Average_bc'].to_numpy()
+        predicted_sh_yield = df['SH_Average_bc'].to_numpy()
+        predicted_added_yield = np.sum([predicted_iq_yield, predicted_sh_yield], axis=0)
+        return predicted_added_yield
 
     def switch_train_test(self):
         regular_training_df=self.training_df
@@ -85,11 +100,11 @@ class x_to_yield_model(model):
         for i in assays:
             sort_names.append('Sort'+str(i)+'_mean_score')
         dataset=self.testing_df
-        dataset=dataset[~dataset[sort_names].isna().any(axis=1)] 
+        dataset=dataset[~dataset[sort_names].isna().any(axis=1)]
         self.testing_df=dataset
 
     def apply_predicted_assay_scores(self,seq_to_assay_model_prop):
-        'uses saved predicted assay scores and saved assay-to-yield model to determine performance on test-set' 
+        'uses saved predicted assay scores and saved assay-to-yield model to determine performance on test-set'
         seq_to_assay_model_name='seq_assay'+self.assay_str+'_'+str(seq_to_assay_model_prop[0])+'_'+str(seq_to_assay_model_prop[1])+'_'+str(seq_to_assay_model_prop[2])
         self.num_test_repeats=1
         self.testing_df=load_format_data.load_df('predicted/seq_to_dot_test_data_'+seq_to_assay_model_name)
@@ -131,35 +146,46 @@ class x_to_assay_model(model):
                 df_prediction=self._model.model.predict(x).squeeze().tolist()
                 df.loc[:,'Sort'+str(self.assays[i])+'_mean_score']=df_prediction
             df.to_pickle('./datasets/predicted/seq_to_dot_test_data_'+self.model_name+'_'+str(z)+'.pkl')
-        
 
-    def save_sequence_embeddings(self,df_list=None):
+    def save_sequence_embeddings(self, df_list=None, is_ordinals_only=False):
         'save sequence embeddings of model'
-
+        # df_list: must either be a list of strings to load dataframes
+        #          of a list of dataframes
+        # is_ordinals_only: True if it just ordinals [default: false]
         if not df_list:
-            df_list=['assay_to_dot_training_data','seq_to_dot_test_data','seq_to_assay_train_1,8,10']
-        OH_matrix=np.eye(len(self.assays))
-
+            df_list = ['assay_to_dot_training_data', 'seq_to_dot_test_data','seq_to_assay_train_1,8,10']
+        OH_matrix = np.eye(len(self.assays))
         for df_name in df_list:
-            df=load_format_data.load_df(df_name)
-            x_a=self.get_input_seq(df)
-            for z in range(10): #for each model
-                for i in range(1): #only need to get cat var for one assay to get sequence embedding 
-                    cat_var=[]
-                    for j in x_a: #for each sequence add cat_var
+            if is_ordinals_only:
+                df = df_name
+            else:
+                df = load_format_data.load_df(df_name)
+            x_a = self.get_input_seq(df)
+            for z in range(3):  # for each model
+                for i in range(1):  # only need to get cat var for one assay to get sequence embedding
+                    cat_var = []
+                    for j in x_a:  # for each sequence add cat_var
                         cat_var.append(OH_matrix[i].tolist())
-                    x=load_format_data.mix_with_cat_var(x_a,cat_var)
-                    self._model.set_model(self.get_best_trial()['hyperparam'],xa_len=len(x[0])-len(cat_var[0]), cat_var_len=len(cat_var[0]),lin_or_sig=self.lin_or_sig) #need to build nn arch
-                    self.load_model(z) #load pkled sklearn model or weights of nn model
-                    seq_embedding_model=self._model.get_seq_embeding_layer_model()
-                    df_prediction=seq_embedding_model.predict([x])
-                    seq_emb_list=[]
+                    x = load_format_data.mix_with_cat_var(x_a, cat_var)
+                    self._model.set_model(self.get_best_trial()['hyperparam'], xa_len=len(x[0]) - len(cat_var[0]),
+                                          cat_var_len=len(cat_var[0]),
+                                          lin_or_sig=self.lin_or_sig)  # need to build nn arch
+                    self.load_model(z)  # load pkled sklearn model or weights of nn model
+                    seq_embedding_model = self._model.get_seq_embeding_layer_model()
+                    df_prediction = seq_embedding_model.predict([x])
+                    seq_emb_list = []
                     for i in df_prediction:
                         seq_emb_list.append([i])
-                    df.loc[:,'learned_embedding']=seq_emb_list
-                df.to_pickle('./datasets/predicted/learned_embedding_'+df_name+'_'+self.model_name+'_'+str(z)+'.pkl')
-
-
+                    if is_ordinals_only:
+                        df.loc[:, 'learned_embedding_' + str(z)] = seq_emb_list
+                    else:
+                        df.loc[:, 'learned_embedding'] = seq_emb_list
+                        df.to_pickle(
+                            './datasets/predicted/learned_embedding_' + df_name + '_' + self.model_name + '_' + str(
+                                z) + '.pkl')
+            if is_ordinals_only:  # if is just ordinals return the dataframe with atrributes:
+                # 'ordinals,learned_embedding_0,learned_embedding_1,learned_embedding_2'
+                return df
 
 class assay_to_yield_model(x_to_yield_model, assay_to_x_model):
     'assay to yield, provide which assays, limit test set to useable subset'
@@ -174,7 +200,7 @@ class weighted_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('weighted_assays'+self.assay_str, model_architecture, sample_fraction)
         assay_to_x_model.__init__(self,assays)
-        self.weightbycounts=True 
+        self.weightbycounts=True
         self.weightbycountsfxn=partial(load_format_data.weightbycounts,assays)
 
 class twogate_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
@@ -182,7 +208,7 @@ class twogate_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
     def __init__(self, assays, stringency, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('twogate'+stringency+'_assays'+self.assay_str, model_architecture, sample_fraction)
-        assay_to_x_model.__init__(self,assays)    
+        assay_to_x_model.__init__(self,assays)
         self.training_df=load_format_data.load_df('assay_to_dot_training_data_twogate_'+stringency)
         self.testing_df=load_format_data.load_df('seq_to_dot_test_data_twogate_'+stringency)
 
@@ -225,9 +251,9 @@ class seqandtwogateassay_to_yield_model(x_to_yield_model):
     def __init__(self,assays, stringency, model_architecture,sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('seq_and_twogate'+stringency+'_assays'+self.assay_str,model_architecture,sample_fraction)
-        self.get_input_seq=partial(load_format_data.get_seq_and_assays,assays)   
+        self.get_input_seq=partial(load_format_data.get_seq_and_assays,assays)
         self.training_df=load_format_data.load_df('assay_to_dot_training_data_twogate_'+stringency)
-        self.testing_df=load_format_data.load_df('seq_to_dot_test_data_twogate_'+stringency) 
+        self.testing_df=load_format_data.load_df('seq_to_dot_test_data_twogate_'+stringency)
 
 class seqandweightedassay_to_yield_model(x_to_yield_model):
     'sequence and assay input, training weighted by observations'
@@ -235,7 +261,7 @@ class seqandweightedassay_to_yield_model(x_to_yield_model):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('weighted_seq_and_assays'+self.assay_str,model_architecture,sample_fraction)
         self.get_input_seq=partial(load_format_data.get_seq_and_assays,assays)
-        self.weightbycounts=True 
+        self.weightbycounts=True
         self.weightbycountsfxn=partial(load_format_data.weightbycounts,assays)
 
 class seqandstassay_to_yield_model(x_to_yield_model):
