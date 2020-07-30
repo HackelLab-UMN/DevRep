@@ -335,8 +335,8 @@ class sequence_embeding_to_yield_model(x_to_yield_model, sequence_embedding_to_x
         super().__init__('embedding_'+seq_to_assay_model_name, model_architecture, sample_fraction)
         sequence_embedding_to_x_model.__init__(self)
         self.num_test_repeats=1
-        self.training_df=load_format_data.load_df('predicted/learned_embedding_assay_to_dot_training_data_'+seq_to_assay_model_name)
-        self.testing_df=load_format_data.load_df('predicted/learned_embedding_seq_to_dot_test_data_'+seq_to_assay_model_name)
+       # self.training_df=load_format_data.load_df('predicted/learned_embedding_assay_to_dot_training_data_'+seq_to_assay_model_name)
+       # self.testing_df=load_format_data.load_df('predicted/learned_embedding_seq_to_dot_test_data_'+seq_to_assay_model_name)
 
 class final_sequence_embeding_to_yield_model(sequence_embeding_to_yield_model):
     'look at class name, but done with better train/test split'

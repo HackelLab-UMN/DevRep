@@ -196,10 +196,14 @@ def get_control(df):
     x_a=[[]]*len(df)
     return x_a
 
-def get_embedding(df):
+def get_embedding(df, i=None):
     'gets learned embedding for x_a'
-    x_a_in=df.loc[:,'learned_embedding']
-    x_a=[[]]*len(df)
+    # i is an added parameter here for monte carlo sampling for multiple models of the learned embedding
+    if i is None:
+        x_a_in = df.loc[:, 'learned_embedding']
+    else:
+        x_a_in = df.loc[:, 'learned_embedding_' + str(i)]
+    x_a = [[]] * len(df)
     for i in range(len(x_a)):
-        x_a[i]=x_a_in.iloc[i][0].tolist()
+        x_a[i] = x_a_in.iloc[i][0].tolist()
     return x_a

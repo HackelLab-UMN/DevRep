@@ -4,7 +4,6 @@
 # for macOS you can use homebrew for sshpass,  you need xcode command line tools, and homebrew
 # brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
 
-
 # additional instructions for installing ssh : https://gist.github.com/arunoda/7790979
 
 PASSWORD='1234' #TODO: Specify password to msi account

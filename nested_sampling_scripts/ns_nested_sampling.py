@@ -1,21 +1,16 @@
 import time
 import submodels_module as mb
-import load_format_data
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import os
 import sys
 from abc import ABC, abstractmethod
-import matplotlib.pyplot as plt
-import scipy.sparse as sparse
-import ns_sampling_modules as sm
-import ns_plot_modules as pm
+from nested_sampling_scripts import ns_sampling_modules as sm, ns_msi as msi, ns_plot_modules as pm
 # compiled optimizer
 import matplotlib as mpl
-mpl.use('Agg')
-from contextlib import contextmanager
 
+mpl.use('Agg')
 
 tf.config.optimizer.set_jit(True)
 
@@ -50,10 +45,12 @@ class nested_sampling(ABC):
         self.start_time = None
         self.min_yield = []
         # parent random number generator
-        self.vp = []
         self.percent_pos = []
         self.vp_step = []
         self.dir_name=[]
+
+        self.nb_mutations=1
+        self.mutation_type='static'
 
         # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
@@ -65,7 +62,7 @@ class nested_sampling(ABC):
         # method an all will be good.
         # write2pickle is a boolean flag to see where optimized sequences should be written too.
         # TODO: make sure to add nproc to this as well? maybe?
-        self.dir_name= 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i' % (self.nb_of_sequences, N_steps, N_loops)
+        self.dir_name= sm.make_directory(Nb_loops=N_loops,Nb_steps=N_steps,nb_sequences=self.nb_of_sequences,)
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
         #TODO: check for error in making the file, OS dependent for fileError
 
@@ -82,8 +79,6 @@ class nested_sampling(ABC):
         sm.save_run_stats(self=self,nb_loops=N_loops,nb_steps=N_steps,steps_2_show=steps_2_show,
                           loops_2_show=loops_2_show)
 
-        # TODO: error checking for steps and loops to show?
-        pm.init_violin_plots(self,loops_2_show=loops_2_show)
         # self.init_step_plots(steps_2_show=steps_2_show)
 
         # TODO: figure out the orginal_seq and test_seq craziness... honestly test sequence
@@ -97,20 +92,21 @@ class nested_sampling(ABC):
             self.init_walk(j=j, steps_2_show=steps_2_show, loops_2_show=loops_2_show)
             #TODO: the heat map plots the last distribution before the last walk...
             self.walk(min_yield=self.min_yield[-1], steps_2_show=steps_2_show, j=j, N_steps=N_steps,
-                      loops_2_show=loops_2_show, N_loops=N_loops)  # default is N=10
+                      loops_2_show=loops_2_show, N_loops=N_loops)
             _, idx = self.update_min_yield(self.original_seq)
             self.change_lowest_yield_sequence_configuration(idx)  # change to another sequence in the configuration
             if j in loops_2_show:
                 sm.take_snapshot(self=self,loop_nb=j)
+
         # TODO: plot the rate of change of min yield as well ...
         pm.make_min_yield_plot(dir_name=self.dir_name,min_yield_lst=self.min_yield,N_loops=N_loops)
 
         pm.make_percent_positive_plot(dir_name=self.dir_name,N_steps=N_steps, N_loops=N_loops,
                                       percent_pos=self.percent_pos)
 
-
-
         self.times.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='times',fileformat='pkl'))
+
+        msi.zip_data(dir_name=self.dir_name)
         return self.times
     @abstractmethod
     def walk(self, min_yield, steps_2_show, N_loops, loops_2_show, N_steps=10, j=1):
@@ -124,7 +120,6 @@ class nested_sampling(ABC):
             self.original_seq = self.get_yield().copy()
             self.update_min_yield(self.original_seq)
         if j in loops_2_show and 0 in steps_2_show:
-            pm.plot_violin(i=0, j=j, seq=self.original_seq, loops_2_show=loops_2_show, steps_2_show=steps_2_show,self=self)
             pm.make_heat_map(df=self.original_seq,dir_name=self.dir_name,loop_nb=j)
     # private methods
     def get_yield(self):
@@ -203,18 +198,26 @@ class nested_sampling(ABC):
         print('updated lowest min yield')
         # retrun the arg min for the lowest developability
 
-
+    # def get_percent_pos_average(self):
+    #     return np.sum(self.percent_pos,axis=0)/len(self.percent_pos[0])
 class ns_random_sample(nested_sampling):
+    'abstract class'
     # nested sampling random sampling implementation.
+    '''this class must define the abstract method get_nb_mutations
+    which returns the numbe
+    '''
     def __init__(self,Nb_sequences):
         super().__init__(Nb_sequences=Nb_sequences)
         # initilize generator
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
         # note: things may change between tensorflow versions
         self.g = tf.random.experimental.Generator.from_seed(seed)
+        #self.nb_mutations=nb_mutations
+
 
     def walk(self, min_yield, steps_2_show, loops_2_show, N_loops, N_steps=10, j=1):
         'this is a random walk that makes one mutation at a time'
+
         # here make min_yield a local parameter,  it is required
         # N is the number of iterations , can update in the future to do an actual convergence algorithm
         # i and j represent the histogram to plot too. default is just a single walk.
@@ -224,6 +227,7 @@ class ns_random_sample(nested_sampling):
         for i in np.arange(N_steps):
             print('loop %i of %i, step %i of %i' % (j + 1, N_loops, i + 1, N_steps))
             self.start_timer()
+            # for k in np.arange(self.get_nb_mutations()):
             self.mutate()
             self.test_seq = self.test_seq[['Ordinal']]
             print('getting yield')
@@ -232,16 +236,10 @@ class ns_random_sample(nested_sampling):
             percent_pos.append(pp)
             # self.check()
             self.stop_timer(j=j, i=i, loops_2_show=loops_2_show)
-            if i + 1 in steps_2_show and j in loops_2_show:
-                pm.plot_violin(i=i + 1, j=j, seq=self.original_seq, steps_2_show=steps_2_show,
-                                 loops_2_show=loops_2_show,self=self)
         self.percent_pos.append(percent_pos)
-        if j in loops_2_show:
-            pm.close_violin(j=j, steps_2_show=steps_2_show, loops_2_show=loops_2_show, Nb_loops=N_loops,
-                              Nb_steps=N_steps,self=self)
 
     def mutate(self):
-    #TODO: add options for multiple mutations, or until your in that sweet spot acceptance zone
+        # TODO: add options for multiple mutations, or until your in that sweet spot acceptance zone
         'mutate the sequences where necessary, this is a random mutation'
         # mutate every sequence of the original
         # for a mutation to occur ;
@@ -254,13 +252,13 @@ class ns_random_sample(nested_sampling):
         random_AA = self.g.uniform(shape=[self.nb_of_sequences], minval=0, maxval=21, dtype=tf.int64).numpy()
         # [0,21)
         # remove blanks from the sequence
-        test_numpy_seq = sm.convert2numpy(df=self.test_seq,field='Ordinal')
-        random_AA = sm.remove_blanks(generator=self.g,random_AA_pos=random_AA_pos,random_AA= random_AA, seq=test_numpy_seq)
+        test_numpy_seq = sm.convert2numpy(df=self.test_seq, field='Ordinal')
+        random_AA = sm.remove_blanks(generator=self.g, random_AA_pos=random_AA_pos, random_AA=random_AA,
+                                     seq=test_numpy_seq)
         print('mutating test sequence')
         # converting to numpy for logical array manipulation
         # test_numpy_seq[:, random_AA_pos] = random_AA
         # there has to be a way to do this without a loop.
-        
         test_list_seq = []
         for j, r_AA, r_AA_pos, i in zip(test_numpy_seq, random_AA, random_AA_pos, np.arange(test_numpy_seq.shape[0])):
             j[r_AA_pos] = r_AA
@@ -268,37 +266,10 @@ class ns_random_sample(nested_sampling):
 
         self.test_seq['Ordinal'] = test_list_seq
 
+    # @abstractmethod
+    # def get_nb_mutations(self):
+    #     pass
 
 
 
-def driver(N_loops,N_steps,nb_snapshots=10,Nb_sequences=1000,suppress_output=False):
-    # this is code to just go for a walk
-    trial1 = ns_random_sample(Nb_sequences=Nb_sequences)
-    # first_seqeunce = trial1.get_yield()
-    # min_yield_start , _= trial1.update_min_yield(first_seqeunce)
-    # trial1.plot_hist(0, 1,first_seqeunce)
-    # trial1.walk(min_yield=min_yield_start)
-    step = N_loops // nb_snapshots
-
-    loops_2_show=np.arange(0,N_loops+step,step)
-    loops_2_show[-1]=loops_2_show[-1]-1
-    if suppress_output is True:
-        with suppress_stdout():
-            trial1.nested_sample(N_loops=N_loops,N_steps=N_steps,loops_2_show=loops_2_show)
-    else:
-        times = trial1.nested_sample(N_loops=N_loops, N_steps=N_steps,loops_2_show=loops_2_show)
-        print(times)
-
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:
-            yield
-        finally:
-            sys.stdout = old_stdout
-# class ns_one_mutation(ns_random_sample):
-#     'this class does one mutation at a time'
-#     def __init__(self):
-#         super().__init__()
+#TODO: smart sample which uses a combination of both

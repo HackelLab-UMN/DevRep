@@ -1,64 +1,13 @@
-
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import ns_sampling_modules as sm
+
 mpl.use('Agg')
 import pandas as pd
 import seaborn as sns
 import numpy as np
 import os
-import sys
-import tensorflow as tf
-import ns_sampling_modules as sm
-ML_DEVELOPABILITY = '/Users/bryce.johnson/Desktop/ML/Developability'
-def init_violin_plots(self,loops_2_show):
-    'initilize the violin plots'
-    nb_violinplots = len(loops_2_show)
-    for k in np.arange(nb_violinplots):
-        self.vp.append(plt.subplots(1, 1, figsize=[5, 3], dpi=300))
-    return self.vp
-
-
-def plot_violin(self, i, j, seq, steps_2_show, loops_2_show):
-    # i is the step number
-    # j is the Loop number
-    # TODO: Should show the min yield as a red line - not the median
-    idx_loop = np.argmax(loops_2_show == j)
-    idx_step = np.argmax(steps_2_show == i)
-    dev = seq['Developability'].to_numpy()  # yield
-    violin_parts = self.vp[idx_loop][1].violinplot([dev], positions=[idx_step], showmedians=False,
-                                                   showextrema=False, points=100,
-                                                   widths=.9)
-    for pc in violin_parts['bodies']:
-        pc.set_color('k')
-
-
-def close_violin(self, j, steps_2_show, loops_2_show, Nb_steps, Nb_loops, y_lim=None):
-    'close a violin plot and save it as a png file'
-    if y_lim is None:
-        y_lim = [-1, 1.5]
-    v = self.vp[np.argmax(loops_2_show == j)]
-    str_steps_2_show = []
-    for i in steps_2_show:
-        if i == 0:
-            str_steps_2_show.append('Init')
-        else:
-            str_steps_2_show.append('step:%i,percent:%0.2f' % (i,sum(self.percent_pos[j])/Nb_steps))
-    fig = v[0]
-    ax = v[1]
-    ax.set_xticks(np.arange(len(steps_2_show)))
-    ax.set_ylim(y_lim)
-    ax.set_xticklabels(str_steps_2_show)
-    ax.set_ylabel('Yield', fontsize=6)
-    ax.tick_params(axis='both', which='major', labelsize=6)
-    ax.set_title('Loop %i of %i' % (j + 1, Nb_loops))
-    ax.axhline(self.min_yield[j]).set_color('r')
-    fig.tight_layout()
-    print('saving'+make_file_name(dir_name=self.dir_name,file_description='loop_%i'%(j+1),fileformat='png'))
-    fig.savefig(make_file_name(dir_name=self.dir_name,file_description='loop_%i'%(j+1),fileformat='png'))
-    plt.close(fig)
-
+import nested_sampling_scripts.ns_sampling_modules as sm
+from ns_password import LOCAL_DIRECTORY
 
 def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=None):
     'nb strings is the number of strings in the violin plot'
@@ -66,7 +15,7 @@ def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=
     if y_lim is None:
         y_lim = [-1, 1.5]
     dir_name=sm.make_directory(Nb_steps=nb_steps,Nb_loops=nb_loops)
-    src=ML_DEVELOPABILITY+'/sampling_data/'+dir_name
+    src=LOCAL_DIRECTORY+'/sampling_data/'+dir_name
     # files=os.listdir(path=src)
     # numbers=[]
     # strings=[]
@@ -164,9 +113,9 @@ def plot_hist(dir_name, i, j, seq,bins=50):
     plt.close()
 
 
+# put this is msi?
 def make_file_name(dir_name,file_description,fileformat='pkl'):
     return './sampling_data/' + dir_name+'/'+ file_description +'.'+fileformat
-
 
 
 def make_heat_map(df,dir_name,loop_nb):
@@ -250,3 +199,52 @@ def heat_map_plot(frequency,dir_name,loop_nb):
 # original_seq['Ordinal']= sm.make_sampling_data(generator=g_parent,Nb_sequences=1000,Nb_positions=16)
 # os.system('mkdir ./sampling_data/test_heat_map')
 # make_heat_map(df=original_seq,dir_name='test_heat_map',loop_nb=0)
+
+
+# def init_violin_plots(self,loops_2_show):
+#     'initilize the violin plots'
+#     nb_violinplots = len(loops_2_show)
+#     for k in np.arange(nb_violinplots):
+#         self.vp.append(plt.subplots(1, 1, figsize=[5, 3], dpi=300))
+#     return self.vp
+#
+#
+# def plot_violin(self, i, j, seq, steps_2_show, loops_2_show):
+#     # i is the step number
+#     # j is the Loop number
+#     # TODO: Should show the min yield as a red line - not the median
+#     idx_loop = np.argmax(loops_2_show == j)
+#     idx_step = np.argmax(steps_2_show == i)
+#     dev = seq['Developability'].to_numpy()  # yield
+#     violin_parts = self.vp[idx_loop][1].violinplot([dev], positions=[idx_step], showmedians=False,
+#                                                    showextrema=False, points=100,
+#                                                    widths=.9)
+#     for pc in violin_parts['bodies']:
+#         pc.set_color('k')
+#
+#
+# def close_violin(self, j, steps_2_show, loops_2_show, Nb_steps, Nb_loops, y_lim=None):
+#     'close a violin plot and save it as a png file'
+#     if y_lim is None:
+#         y_lim = [-1, 1.5]
+#     v = self.vp[np.argmax(loops_2_show == j)]
+#     str_steps_2_show = []
+#     for i in steps_2_show:
+#         if i == 0:
+#             str_steps_2_show.append('Init')
+#         else:
+#             str_steps_2_show.append('step:%i,percent:%0.2f' % (i,sum(self.percent_pos[j])/Nb_steps))
+#     fig = v[0]
+#     ax = v[1]
+#     ax.set_xticks(np.arange(len(steps_2_show)))
+#     ax.set_ylim(y_lim)
+#     ax.set_xticklabels(str_steps_2_show)
+#     ax.set_ylabel('Yield', fontsize=6)
+#     ax.tick_params(axis='both', which='major', labelsize=6)
+#     ax.set_title('Loop %i of %i' % (j + 1, Nb_loops))
+#     ax.axhline(self.min_yield[j]).set_color('r')
+#     fig.tight_layout()
+#     print('saving'+make_file_name(dir_name=self.dir_name,file_description='loop_%i'%(j+1),fileformat='png'))
+#     fig.savefig(make_file_name(dir_name=self.dir_name,file_description='loop_%i'%(j+1),fileformat='png'))
+#     plt.close(fig)
+

@@ -24,16 +24,18 @@ of DevRep in `ns_passwords.py`
 
 #**Python File Descriptions** 
 
-- `ns_nested_sampling.py` : main script that contains classes to run nested sampling
-if you would like to make your own monte carlo sequence, it must inherit the `nested_sampling`
-class and must have a single method named walk, specifying how to do the random walk. 
 - `ns_main_sampling.py` : go here to specify input parameters for a run 
+- `ns_nested_sampling.py` : main script that contains classes to run nested sampling
+if you would like to make your own monte carlo walk, it must inherit the `nested_sampling`
+class and must have a single method named walk, specifying how to do the random walk. 
 - `ns_show_results.py` : see results of `ns_main_sampling` with figures. 
 - `ns_plot_modules.py` : contains helper functions to plot figures 
 - `ns_sampling_modules.py`: helper functions to sample ordinals , change blanks
 - `ns_msi.py` : some helper functions to transfer data to and from msi
 
 #**The Algorithm** 
+
+
 
 #Version Stats
 Author: Bryce Johnson joh14192@umn.edu , Alex Golinski, Prof. Stefano Martiniani

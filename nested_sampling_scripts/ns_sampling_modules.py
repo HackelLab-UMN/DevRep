@@ -1,15 +1,9 @@
-import time
-import submodels_module as mb
-import load_format_data
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import os
 import sys
-import ns_plot_modules as pm
-import pickle
-from abc import ABC, abstractmethod
-import matplotlib.pyplot as pl
+from nested_sampling_scripts import ns_plot_modules as pm
 
 
 def incorrect_blanks(random_AA, random_AA_pos, seq):
@@ -102,13 +96,11 @@ def _unit_tests_accuracy_blank_removal():
     remove_blanks(random_AA=random_AA, random_AA_pos=random_AA_pos, seq=seq, generator=g_parent)
 
 
+def make_directory(Nb_steps,Nb_loops,nb_sequences=1000,nb_mutations=1, mutation_type='static'):
+    return 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i_%s_%i'%(nb_sequences,Nb_steps,Nb_loops,mutation_type,nb_mutations)
 
-def make_directory(Nb_steps,Nb_loops,nb_sequences=1000):
-    return 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i'%(nb_sequences,Nb_steps,Nb_loops)
 def make_sequence_filename(loop_nb):
     return 'sequences_loop_%i'%loop_nb
-
-
 
 def take_snapshot(self,loop_nb):
     # make the dataframe
@@ -131,13 +123,13 @@ def take_snapshot(self,loop_nb):
     pp_df.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='percent_pos_average'))
 
 
-
-
 def save_run_stats(self,nb_loops,nb_steps,steps_2_show,loops_2_show):
     # save initial run stats
     stats=pd.DataFrame()
     stats.loc[0,'Nb_loops']=nb_loops
     stats.loc[0,'Nb_Steps']=nb_steps
+    stats.loc[0,'nb mutations']=self.nb_mutations
+    stats.loc[0,'mutation_type']='static'
     stats['Steps to show']=convert2pandas(np.array([steps_2_show]))
     stats['Loops to show']=convert2pandas(np.array([loops_2_show]))
     stats['Directory name']=self.dir_name
