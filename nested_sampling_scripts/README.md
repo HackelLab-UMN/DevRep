@@ -1,11 +1,11 @@
-#**Nested sampling**
+#Nested sampling
 This is the set up for the nested sampling modules for DevRep. The goal of this nested sampling 
 routine is to find the optimal sequences with the highest yield. As reference all files that lead with a `ns_*.py` 
 pertain to nested sampling files. 
 
 As of right now only doing single mutations. Also no parrelizations. 
 
-#**Set up**
+#Set up
 
 1. if not done already, make local conda environment as specified by `/DevRep/conda_package_list.txt`, 
 instructions to create the environment are in the file. 
@@ -22,7 +22,7 @@ steps to use(`N_steps`), number of sequences (`nb_sequences`), and number of sna
 and data between msi account and local drive in `ns_msi.py`. Just specify the full path to 
 of DevRep in `ns_passwords.py` 
 
-#**Python File Descriptions** 
+#Python File Descriptions
 
 - `ns_main_sampling.py` : go here to specify input parameters for a run 
 - `ns_nested_sampling.py` : main script that contains classes to run nested sampling
@@ -33,8 +33,7 @@ class and must have a single method named walk, specifying how to do the random 
 - `ns_sampling_modules.py`: helper functions to sample ordinals , change blanks
 - `ns_msi.py` : some helper functions to transfer data to and from msi
 
-#**The Algorithm** 
-
+#The Algorithm
 
 
 #Version Stats
