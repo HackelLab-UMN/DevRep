@@ -3,8 +3,8 @@ import matplotlib as mpl
 mpl.use('Agg')
 import pandas as pd
 import os
-import nested_sampling_scripts.ns_sampling_modules as sm
-from nested_sampling_scripts import ns_plot_modules as pm
+import ns_sampling_modules as sm
+import ns_plot_modules as pm
 
 #pm.violin_saved_dataset(sm.make_directory(Nb_loops=15000,Nb_steps=4))
 ML_DEVELOPABILITY = '/Users/bryce.johnson/Desktop/ML/Developability'

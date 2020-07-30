@@ -1,4 +1,4 @@
-from nested_sampling_scripts import ns_nested_sampling as ns
+import ns_nested_sampling as ns
 import numpy as np
 from contextlib import contextmanager
 import os
@@ -20,11 +20,12 @@ import sys
 Number_loops=4
 Number_steps=2
 Number_snapshots=4
+mutations_type='static'
+nb_mutations=3
 
 
-
-def driver(N_loops,N_steps,nb_snapshots=10,Nb_sequences=1000,suppress_output=False):
-    trial1 = ns.ns_random_sample(Nb_sequences=Nb_sequences)
+def driver(N_loops,N_steps,nb_snapshots=10,Nb_sequences=1000,suppress_output=False,mutation_type='static',nb_mutations=1):
+    trial1 = ns.ns_random_sample(Nb_sequences=Nb_sequences,mutation_type=mutation_type,nb_mutations=nb_mutations)
     step = N_loops // nb_snapshots
     loops_2_show=np.arange(0,N_loops+step,step)
     loops_2_show[-1]=loops_2_show[-1]-1
@@ -47,7 +48,8 @@ def suppress_stdout():
 
 
 
-driver(N_loops=Number_loops, N_steps=Number_steps, nb_snapshots=Number_snapshots)
+driver(N_loops=Number_loops, N_steps=Number_steps, nb_snapshots=Number_snapshots,
+       mutation_type=mutations_type,nb_mutations=nb_mutations)
 
 
 

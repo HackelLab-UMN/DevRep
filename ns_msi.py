@@ -1,4 +1,4 @@
-from nested_sampling_scripts import ns_sampling_modules as sm
+import ns_sampling_modules as sm
 import os
 from ns_password import PASSWORD,MSI_DIRECTORY,LOCAL_DIRECTORY
 
@@ -60,3 +60,4 @@ def zip_data(dir_name):
 # push_scripts(['main_DevRep_example.py'])
 
 
+#push_scripts()

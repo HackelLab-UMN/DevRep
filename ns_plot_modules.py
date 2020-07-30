@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import os
-import nested_sampling_scripts.ns_sampling_modules as sm
+import ns_sampling_modules as sm
 from ns_password import LOCAL_DIRECTORY
 
 def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=None):

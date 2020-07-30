@@ -6,7 +6,9 @@ import tensorflow as tf
 import os
 import sys
 from abc import ABC, abstractmethod
-from nested_sampling_scripts import ns_sampling_modules as sm, ns_msi as msi, ns_plot_modules as pm
+import ns_plot_modules as pm
+import ns_msi as msi
+import ns_sampling_modules as sm
 # compiled optimizer
 import matplotlib as mpl
 
@@ -16,7 +18,7 @@ tf.config.optimizer.set_jit(True)
 
 class nested_sampling(ABC):
     # main method is to call is walk()
-    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16):
+    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16,nb_mutations=1,mutaiton_type='static'):
         # TODO: check times for different number of sequences
         'nested sampling initilization for number of sequences and number of positions of ordinals'
         # initilize default model parameters
@@ -49,8 +51,8 @@ class nested_sampling(ABC):
         self.vp_step = []
         self.dir_name=[]
 
-        self.nb_mutations=1
-        self.mutation_type='static'
+        self.nb_mutations=[nb_mutations]
+        self.mutation_type=mutaiton_type
 
         # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
@@ -62,7 +64,9 @@ class nested_sampling(ABC):
         # method an all will be good.
         # write2pickle is a boolean flag to see where optimized sequences should be written too.
         # TODO: make sure to add nproc to this as well? maybe?
-        self.dir_name= sm.make_directory(Nb_loops=N_loops,Nb_steps=N_steps,nb_sequences=self.nb_of_sequences,)
+        self.dir_name= sm.make_directory(Nb_loops=N_loops,Nb_steps=N_steps,nb_sequences=self.nb_of_sequences,
+                                         nb_mutations=self.nb_mutations[-1],mutation_type=self.mutation_type)
+
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
         #TODO: check for error in making the file, OS dependent for fileError
 
@@ -206,8 +210,8 @@ class ns_random_sample(nested_sampling):
     '''this class must define the abstract method get_nb_mutations
     which returns the numbe
     '''
-    def __init__(self,Nb_sequences):
-        super().__init__(Nb_sequences=Nb_sequences)
+    def __init__(self,Nb_sequences,nb_mutations,mutation_type):
+        super().__init__(Nb_sequences=Nb_sequences,nb_mutations=nb_mutations, mutaiton_type=mutation_type)
         # initilize generator
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
         # note: things may change between tensorflow versions
@@ -227,8 +231,9 @@ class ns_random_sample(nested_sampling):
         for i in np.arange(N_steps):
             print('loop %i of %i, step %i of %i' % (j + 1, N_loops, i + 1, N_steps))
             self.start_timer()
-            # for k in np.arange(self.get_nb_mutations()):
-            self.mutate()
+            print('making %i mutations'%self.nb_mutations[-1])
+            for k in np.arange(self.nb_mutations[-1]):
+                self.mutate()
             self.test_seq = self.test_seq[['Ordinal']]
             print('getting yield')
             self.get_yield()
@@ -265,10 +270,6 @@ class ns_random_sample(nested_sampling):
             test_list_seq.append((j))
 
         self.test_seq['Ordinal'] = test_list_seq
-
-    # @abstractmethod
-    # def get_nb_mutations(self):
-    #     pass
 
 
 

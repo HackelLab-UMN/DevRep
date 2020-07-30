@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import os
 import sys
-from nested_sampling_scripts import ns_plot_modules as pm
+import ns_plot_modules as pm
 
 
 def incorrect_blanks(random_AA, random_AA_pos, seq):
@@ -128,7 +128,7 @@ def save_run_stats(self,nb_loops,nb_steps,steps_2_show,loops_2_show):
     stats=pd.DataFrame()
     stats.loc[0,'Nb_loops']=nb_loops
     stats.loc[0,'Nb_Steps']=nb_steps
-    stats.loc[0,'nb mutations']=self.nb_mutations
+    stats.loc[0,'start mutation']=self.nb_mutations[-1]
     stats.loc[0,'mutation_type']='static'
     stats['Steps to show']=convert2pandas(np.array([steps_2_show]))
     stats['Loops to show']=convert2pandas(np.array([loops_2_show]))
