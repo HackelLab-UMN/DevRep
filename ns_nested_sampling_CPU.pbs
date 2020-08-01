@@ -6,5 +6,5 @@
 module load conda
 source activate awg
 
-cd ./Developability
-python3 nested_sampling.py $PBS_ARRAYID
+cd ./DevRep
+python3 ns_main_sampling.py $PBS_ARRAYID

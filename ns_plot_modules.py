@@ -9,6 +9,7 @@ import os
 import ns_sampling_modules as sm
 from ns_password import LOCAL_DIRECTORY
 
+#TODO: make imput parameters a dictionary for everything rather than a list of parameters.
 def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=None):
     'nb strings is the number of strings in the violin plot'
     # first make the directory and get all the pkl files

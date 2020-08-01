@@ -3,37 +3,24 @@ import numpy as np
 from contextlib import contextmanager
 import os
 import sys
-
+from input_deck import inputs
 # the input deck : specify these input parameters
 
 
-'''THIS IS THE INPUT DECK :
-    Number of loops --> number of monte carlo walks to do 
-    Number of steps --> number of steps to take in a random walk, a single step can have multiple mutations
-    Number of snapshots --> how often to save the data. 
-    Mutation type -->as of right now two options , 'static' or 'dynamic'. 
-    Number of mutations --> if static the a constant for number of mutations,
-     if dynamic then the number of mutations to start with. 
-'''
-
-
-Number_loops=4
-Number_steps=2
-Number_snapshots=4
-mutations_type='static'
-nb_mutations=3
-
-
-def driver(N_loops,N_steps,nb_snapshots=10,Nb_sequences=1000,suppress_output=False,mutation_type='static',nb_mutations=1):
-    trial1 = ns.ns_random_sample(Nb_sequences=Nb_sequences,mutation_type=mutation_type,nb_mutations=nb_mutations)
-    step = N_loops // nb_snapshots
-    loops_2_show=np.arange(0,N_loops+step,step)
+def driver(c,suppress_output=False):
+    trial1 = ns.ns_random_sample(Nb_sequences=c.Nb_sequences)
+    step = c.nb_loops // c.nb_snapshots
+    loops_2_show=np.arange(0,c.nb_loops+step,step)
     loops_2_show[-1]=loops_2_show[-1]-1
     if suppress_output is True:
         with suppress_stdout():
-            trial1.nested_sample(N_loops=N_loops,N_steps=N_steps,loops_2_show=loops_2_show)
+            # TODO :  is to remove this and just have the class input, it would be so much cleaner
+            #   that way
+            trial1.nested_sample(N_loops=c.nb_loops,N_steps=c.nb_steps,loops_2_show=loops_2_show,mutation_type=c.mutation_type,
+                                 nb_mutations=c.nb_mutations)
     else:
-        times = trial1.nested_sample(N_loops=N_loops, N_steps=N_steps,loops_2_show=loops_2_show)
+        times =  trial1.nested_sample(N_loops=c.nb_loops,N_steps=c.nb_steps,loops_2_show=loops_2_show,mutation_type=c.mutation_type,
+                                 nb_mutations=c.nb_mutations)
         print(times)
 
 @contextmanager
@@ -47,9 +34,22 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
+def check_inputs(c):
+    if c.nb_loops<0 or c.nb_steps<0:
+        raise AttributeError('Number of loops or number of steps is less than zero')
+    if c.nb_snapshots > c.nb_loops:
+        raise AttributeError('Number of snapshots is greater than Number of loops')
+    if c.mutation_type != 'static' and c.mutation_type!='dynamic':
+        raise AttributeError('invalid mutations type: %s'%c.mutation_type)
+    if c.nb_mutations<0:
+        raise AttributeError('Invalid # of mutations: %i'%c.nb_mutations)
+    if c.Nb_sequences <0:
+        raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
+c=inputs()
+check_inputs(c=c)
+driver(c=c)
 
-driver(N_loops=Number_loops, N_steps=Number_steps, nb_snapshots=Number_snapshots,
-       mutation_type=mutations_type,nb_mutations=nb_mutations)
+
 
 
 

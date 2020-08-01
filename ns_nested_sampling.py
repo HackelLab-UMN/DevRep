@@ -7,18 +7,17 @@ import os
 import sys
 from abc import ABC, abstractmethod
 import ns_plot_modules as pm
-import ns_msi as msi
 import ns_sampling_modules as sm
 # compiled optimizer
 import matplotlib as mpl
-
+from global_consts import default_inputs
 mpl.use('Agg')
 
 tf.config.optimizer.set_jit(True)
 
 class nested_sampling(ABC):
     # main method is to call is walk()
-    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16,nb_mutations=1,mutaiton_type='static'):
+    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16):
         # TODO: check times for different number of sequences
         'nested sampling initilization for number of sequences and number of positions of ordinals'
         # initilize default model parameters
@@ -50,25 +49,29 @@ class nested_sampling(ABC):
         self.percent_pos = []
         self.vp_step = []
         self.dir_name=[]
-
-        self.nb_mutations=[nb_mutations]
-        self.mutation_type=mutaiton_type
-
+        self.nb_mutations=[]
+        self.mutation_type=[]
         # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
 
-    def nested_sample(self, N_loops=3, N_steps=2, steps_2_show=None, loops_2_show=None):
+    def nested_sample(self, N_loops, N_steps,nb_mutations,mutation_type,steps_2_show=None, loops_2_show=None):
         'main method to call, does nested sampling'
         # TODO: describe what the inputs should be ...
         # this is the loop I would like to have done by the end of today. So that a driver script can just call this
         # method an all will be good.
         # write2pickle is a boolean flag to see where optimized sequences should be written too.
         # TODO: make sure to add nproc to this as well? maybe?
+        self.nb_mutations.append(nb_mutations)
+        self.mutation_type.append(mutation_type)
+
         self.dir_name= sm.make_directory(Nb_loops=N_loops,Nb_steps=N_steps,nb_sequences=self.nb_of_sequences,
-                                         nb_mutations=self.nb_mutations[-1],mutation_type=self.mutation_type)
+                                         nb_mutations=self.nb_mutations[-1],mutation_type=self.mutation_type[-1])
+
+
 
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
         #TODO: check for error in making the file, OS dependent for fileError
+
 
         if steps_2_show is None:
             # default is to show 3 steps
@@ -99,6 +102,8 @@ class nested_sampling(ABC):
                       loops_2_show=loops_2_show, N_loops=N_loops)
             _, idx = self.update_min_yield(self.original_seq)
             self.change_lowest_yield_sequence_configuration(idx)  # change to another sequence in the configuration
+            self.update_nb_mutations()
+
             if j in loops_2_show:
                 sm.take_snapshot(self=self,loop_nb=j)
 
@@ -110,8 +115,22 @@ class nested_sampling(ABC):
 
         self.times.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='times',fileformat='pkl'))
 
-        msi.zip_data(dir_name=self.dir_name)
+        sm.zip_data(dir_name=self.dir_name)
         return self.times
+
+    def update_nb_mutations(self):
+        if self.mutation_type[-1] is 'static':
+            self.nb_mutations.append(self.nb_mutations[-1])
+        elif self.mutation_type[-1] is 'dynamic':
+            # find current percent positive and percent positive before that.
+            last_pp = sum(self.percent_pos[-1]) / len(self.percent_pos[-1]) *100
+            if last_pp < 20 and self.nb_mutations[-1] > 0:
+                self.nb_mutations.append(self.nb_mutations[-1] - 1)
+            elif last_pp > 20 and last_pp < 30:
+                self.nb_mutations.append(self.nb_mutations[-1])
+            else:
+                self.nb_mutations.append(self.nb_mutations[-1] + 1)
+
     @abstractmethod
     def walk(self, min_yield, steps_2_show, N_loops, loops_2_show, N_steps=10, j=1):
         'abstract method, must define in sublclass how to walk/mutate'
@@ -205,13 +224,9 @@ class nested_sampling(ABC):
     # def get_percent_pos_average(self):
     #     return np.sum(self.percent_pos,axis=0)/len(self.percent_pos[0])
 class ns_random_sample(nested_sampling):
-    'abstract class'
     # nested sampling random sampling implementation.
-    '''this class must define the abstract method get_nb_mutations
-    which returns the numbe
-    '''
-    def __init__(self,Nb_sequences,nb_mutations,mutation_type):
-        super().__init__(Nb_sequences=Nb_sequences,nb_mutations=nb_mutations, mutaiton_type=mutation_type)
+    def __init__(self,Nb_sequences):
+        super().__init__(Nb_sequences=Nb_sequences)
         # initilize generator
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
         # note: things may change between tensorflow versions
@@ -244,7 +259,6 @@ class ns_random_sample(nested_sampling):
         self.percent_pos.append(percent_pos)
 
     def mutate(self):
-        # TODO: add options for multiple mutations, or until your in that sweet spot acceptance zone
         'mutate the sequences where necessary, this is a random mutation'
         # mutate every sequence of the original
         # for a mutation to occur ;

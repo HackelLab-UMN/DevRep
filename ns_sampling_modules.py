@@ -110,6 +110,11 @@ def take_snapshot(self,loop_nb):
         path=pm.make_file_name(dir_name=self.dir_name,file_description='times')
     )
 
+    mutation_nb_df=pd.DataFrame()
+    mutation_nb_df['nb mutations']=self.nb_mutations
+    mutation_nb_df.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='nb_mutations'))
+
+
     min_yield_df=pd.DataFrame()
     min_yield_df['min_yield']=self.min_yield
     min_yield_df.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='min_yield'))
@@ -129,8 +134,15 @@ def save_run_stats(self,nb_loops,nb_steps,steps_2_show,loops_2_show):
     stats.loc[0,'Nb_loops']=nb_loops
     stats.loc[0,'Nb_Steps']=nb_steps
     stats.loc[0,'start mutation']=self.nb_mutations[-1]
-    stats.loc[0,'mutation_type']='static'
+    stats.loc[0,'mutation_type']=self.mutation_type[-1]
     stats['Steps to show']=convert2pandas(np.array([steps_2_show]))
     stats['Loops to show']=convert2pandas(np.array([loops_2_show]))
     stats['Directory name']=self.dir_name
     stats.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='run_stats'))
+
+def zip_data(dir_name):
+    lst=os.listdir(path='./sampling_data/'+dir_name)
+    cmd='zip ./sampling_data/'+dir_name+'/'+dir_name+'.zip'
+    for i in lst:
+        cmd=cmd+' ./sampling_data/'+dir_name+'/'+i
+    os.system(cmd)
