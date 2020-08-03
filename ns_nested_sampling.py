@@ -69,9 +69,6 @@ class nested_sampling(ABC):
 
 
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
-        if fileError is 0:
-            raise SystemError('couldnt make directory %s'%self.dir_name)
-        #TODO: check for error in making the file, OS dependent for fileError
 
 
         if steps_2_show is None:
@@ -84,15 +81,11 @@ class nested_sampling(ABC):
             loops_2_show =np.unique(loops_2_show).copy()
 
 
-        dm.save_run_stats(self=self,c=c,steps_2_show=steps_2_show,
+        dm.save_run_stats(c=c,steps_2_show=steps_2_show,
                           loops_2_show=loops_2_show)
-
-        # self.init_step_plots(steps_2_show=steps_2_show)
 
         # TODO: figure out the orginal_seq and test_seq craziness... honestly test sequence
         #  should just be a local parameter to the walk. not a local to the class one... that would look much better ..
-
-        # get yield should have an input parameter
 
         for j in np.arange(c.nb_loops):
             print('LOOP %i of %i loops' % (j, c.nb_loops))
@@ -284,3 +277,4 @@ class ns_random_sample(nested_sampling):
 
 
 #TODO: smart sample which uses a combination of both
+#TODO: write a bash script that opens an interactive job immedeatily after running

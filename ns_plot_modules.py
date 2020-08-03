@@ -202,7 +202,6 @@ def heat_map_plot(frequency,c,loop_nb):
 # def plot_violin(self, i, j, seq, steps_2_show, loops_2_show):
 #     # i is the step number
 #     # j is the Loop number
-#     # TODO: Should show the min yield as a red line - not the median
 #     idx_loop = np.argmax(loops_2_show == j)
 #     idx_step = np.argmax(steps_2_show == i)
 #     dev = seq['Developability'].to_numpy()  # yield
