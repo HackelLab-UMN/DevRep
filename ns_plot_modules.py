@@ -8,27 +8,17 @@ import numpy as np
 import os
 import ns_sampling_modules as sm
 from ns_password import LOCAL_DIRECTORY
+import ns_data_modules as dm
 
-#TODO: make imput parameters a dictionary for everything rather than a list of parameters.
-def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=None):
+
+def violin_saved_dataset(c,loops_2_show,y_lim=None):
     'nb strings is the number of strings in the violin plot'
     # first make the directory and get all the pkl files
     if y_lim is None:
         y_lim = [-1, 1.5]
-    dir_name=sm.make_directory(Nb_steps=nb_steps,Nb_loops=nb_loops)
-    src=LOCAL_DIRECTORY+'/sampling_data/'+dir_name
-    # files=os.listdir(path=src)
-    # numbers=[]
-    # strings=[]
-    # for i in files:
-    #     # extract the
-    #     if i.startswith('sequences_loop') and i.endswith('.pkl') and int(i[15:-4]) in loops_2_show:
-    #         numbers.append(int(i[15:-4]))
-    #         strings.append(i)
-
-    df_pp = pd.read_pickle(path=os.path.join(src, 'percent_pos_average.pkl'))
+    df_pp = pd.read_pickle(path=dm.make_file_name(c=c,file_description='percent_pos_average'))
     pp = sm.convert2numpy(df=df_pp, field='percent pos average')
-    df_min_yield =pd.read_pickle(path=os.path.join(src,'min_yield.pkl'))
+    df_min_yield =pd.read_pickle(path=dm.make_file_name(c=c,file_description='min_yield'))
     min_yield=sm.convert2numpy(df=df_min_yield,field='min_yield')
 
     # make the figure
@@ -42,7 +32,7 @@ def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=
 
         n=loops_2_show[k]
 
-        df=pd.read_pickle(path=os.path.join(src,'sequences_loop_'+str(loops_2_show[k])+'.pkl'))
+        df=pd.read_pickle(path=dm.make_file_name(c=c,file_description='sequences_loop_'+str(loops_2_show[k])))
         dev=sm.convert2numpy(df=df,field='Developability')
         violin_parts =ax.violinplot([dev], positions=[k], showmedians=False,
                                                        showextrema=False, points=100,
@@ -61,7 +51,7 @@ def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=
     # ax.set_xlabel('Loop',fontsize=6)
     ax.set_ylabel('Yield', fontsize=6)
     ax.tick_params(axis='both', which='major', labelsize=6)
-    ax.set_title('Nested Sampling Loops: %i, Random Walk Steps: %i ' % (np.max(loops_2_show),nb_steps))
+    ax.set_title('Nested Sampling Loops: %i, Random Walk Steps: %i ' % (np.max(loops_2_show),c.nb_steps))
     start=-0.5
     for k in loops_2_show:
         x=[start,start+1]
@@ -72,36 +62,36 @@ def violin_saved_dataset(nb_steps,nb_loops,loops_2_show,nb_sequences=1000,y_lim=
         start=start+1
     ax.legend(['Threshold'])
     fig.tight_layout()
-    print('saving ' + src+'/violin_plot_nb_strings_%i'%nb_strings)
-    fig.savefig(os.path.join(src,'violin_plot_nb_strings_%i'%nb_strings))
+    print('saving ' +dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings))
+    fig.savefig(dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings))
     plt.close(fig)
-        # plot the violin plots
 
 
 
-def make_min_yield_plot(dir_name, N_loops, min_yield_lst):
+def make_min_yield_plot(c, min_yield_lst):
     'this makes the min yield plot'
-    plt.plot(np.arange(N_loops + 1).tolist(), min_yield_lst)
+    plt.plot(np.arange(c.nb_loops + 1).tolist(), min_yield_lst)
     plt.title('min yield vs. nb of loops')
     plt.ylabel('min yield')
     plt.xlabel('nb of loops')
-    plt.savefig(make_file_name(dir_name=dir_name,file_description='min_yield',fileformat='png'))
+    plt.savefig(dm.make_file_name(c=c,
+                                  file_description='min_yield',fileformat='png'))
     plt.close()
 
-def make_percent_positive_plot(dir_name, N_loops, N_steps,percent_pos):
+def make_percent_positive_plot(c,percent_pos):
     'makes the percent positive plot '
     pp = []
-    for i in np.arange(N_loops):
-        pp.append(sum(percent_pos[i])/ N_steps) # Right now percent postive is just the average ...
-    plt.plot(np.arange(N_loops).tolist(), pp)
+    for i in np.arange(c.nb_loops):
+        pp.append(sum(percent_pos[i])/ c.nb_steps) # Right now percent postive is just the average ...
+    plt.plot(np.arange(c.nb_loops).tolist(), pp)
     plt.title('percent accepted vs. for each loop')
     plt.ylabel('percent accepted')
     plt.xlabel('# of loops')
-    plt.savefig(make_file_name(dir_name=dir_name,file_description='percent_pos',fileformat='png'))
+    plt.savefig(dm.make_file_name(c=c,file_description='percent_pos',fileformat='png'))
     plt.close()
 
 
-def plot_hist(dir_name, i, j, seq,bins=50):
+def plot_hist(c, i, j, seq,bins=50):
     # future version
     print('Plotting histogram Step:%i,Loop%i' % (i, j))
     dev=seq['Developability'].to_numpy()
@@ -110,16 +100,15 @@ def plot_hist(dir_name, i, j, seq,bins=50):
               % (i, j, np.min(dev)))
     plt.ylabel('frequency')
     plt.xlabel('yield')
-    plt.savefig(make_file_name(dir_name=dir_name,file_description='hist_loop_%i_step%i'%(j,i),fileformat='png'))
+    plt.savefig(dm.make_file_name(c=c,file_description='hist_loop_%i_step%i'%(j,i),fileformat='png'))
     plt.close()
 
 
-# put this is msi?
-def make_file_name(dir_name,file_description,fileformat='pkl'):
-    return './sampling_data/' + dir_name+'/'+ file_description +'.'+fileformat
 
 
-def make_heat_map(df,dir_name,loop_nb):
+
+
+def make_heat_map(df,c,loop_nb):
     ord=sm.convert2numpy(df=df,field='Ordinal')
     nb_AA=21
     nb_positions=16
@@ -130,10 +119,10 @@ def make_heat_map(df,dir_name,loop_nb):
 
     frequency=(heat_map.T/np.sum(heat_map,axis=1)).T.copy()
 
-    heat_map_plot(frequency=frequency,dir_name=dir_name,loop_nb=loop_nb)
+    heat_map_plot(frequency=frequency,c=c,loop_nb=loop_nb)
 
 
-def heat_map_plot(frequency,dir_name,loop_nb):
+def heat_map_plot(frequency,c,loop_nb):
     'function makes heat map : curtiousy of alex :)'
     frequency = pd.DataFrame(frequency)
     frequency.columns = list("ACDEFGHIKLMNPQRSTVWXY")
@@ -188,8 +177,8 @@ def heat_map_plot(frequency,dir_name,loop_nb):
     ax.set_title('Heat map , loop %i'%(loop_nb+1))
 
     plt.tight_layout()
-    print('saving heatmap .. '+make_file_name(dir_name=dir_name,file_description='heatmap_loop_%i'% loop_nb,fileformat='png'))
-    fig.savefig(make_file_name(dir_name=dir_name,file_description='heatmap_loop_%i'% (loop_nb+1),fileformat='png'))
+    print('saving heatmap .. '+dm.make_file_name(c=c,file_description='heatmap_loop_%i'% loop_nb,fileformat='png'))
+    fig.savefig(dm.make_file_name(c=c,file_description='heatmap_loop_%i'% (loop_nb+1),fileformat='png'))
     plt.close(fig)
 
 

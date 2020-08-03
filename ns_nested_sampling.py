@@ -10,9 +10,9 @@ import ns_plot_modules as pm
 import ns_sampling_modules as sm
 # compiled optimizer
 import matplotlib as mpl
-from global_consts import default_inputs
 mpl.use('Agg')
-
+from input_deck import  inputs
+import ns_data_modules as dm
 tf.config.optimizer.set_jit(True)
 
 class nested_sampling(ABC):
@@ -54,36 +54,37 @@ class nested_sampling(ABC):
         # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
 
-    def nested_sample(self, N_loops, N_steps,nb_mutations,mutation_type,steps_2_show=None, loops_2_show=None):
+    def nested_sample(self, c,steps_2_show=None, loops_2_show=None):
+        c=inputs()
         'main method to call, does nested sampling'
         # TODO: describe what the inputs should be ...
         # this is the loop I would like to have done by the end of today. So that a driver script can just call this
         # method an all will be good.
         # write2pickle is a boolean flag to see where optimized sequences should be written too.
         # TODO: make sure to add nproc to this as well? maybe?
-        self.nb_mutations.append(nb_mutations)
-        self.mutation_type.append(mutation_type)
+        self.nb_mutations.append(c.nb_mutations)
+        self.mutation_type.append(c.mutation_type)
 
-        self.dir_name= sm.make_directory(Nb_loops=N_loops,Nb_steps=N_steps,nb_sequences=self.nb_of_sequences,
-                                         nb_mutations=self.nb_mutations[-1],mutation_type=self.mutation_type[-1])
-
+        self.dir_name= dm.make_directory(c=c)
 
 
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
+        if fileError is 0:
+            raise SystemError('couldnt make directory %s'%self.dir_name)
         #TODO: check for error in making the file, OS dependent for fileError
 
 
         if steps_2_show is None:
             # default is to show 3 steps
-            steps_2_show = np.array([0, N_steps // 2, N_steps])
+            steps_2_show = np.array([0, c.nb_steps // 2, c.nb_steps])
             steps_2_show = np.unique(steps_2_show).copy()
         if loops_2_show is None:
             # default is to show 3 loops
-            loops_2_show = np.array([0, N_loops // 2, N_loops-1])
+            loops_2_show = np.array([0, c.nb_loops // 2, c.nb_loops-1])
             loops_2_show =np.unique(loops_2_show).copy()
 
 
-        sm.save_run_stats(self=self,nb_loops=N_loops,nb_steps=N_steps,steps_2_show=steps_2_show,
+        dm.save_run_stats(self=self,c=c,steps_2_show=steps_2_show,
                           loops_2_show=loops_2_show)
 
         # self.init_step_plots(steps_2_show=steps_2_show)
@@ -93,29 +94,32 @@ class nested_sampling(ABC):
 
         # get yield should have an input parameter
 
-        for j in np.arange(N_loops):
-            print('LOOP %i of %i loops' % (j, N_loops))
+        for j in np.arange(c.nb_loops):
+            print('LOOP %i of %i loops' % (j, c.nb_loops))
             #TODO: change the order of these so you are taking a snapshot and initing the walk at the right time
-            self.init_walk(j=j, steps_2_show=steps_2_show, loops_2_show=loops_2_show)
-            #TODO: the heat map plots the last distribution before the last walk...
-            self.walk(min_yield=self.min_yield[-1], steps_2_show=steps_2_show, j=j, N_steps=N_steps,
-                      loops_2_show=loops_2_show, N_loops=N_loops)
+            if j == 0:
+                self.original_seq = self.get_yield().copy()
+                self.update_min_yield(self.original_seq)
+
+            self.walk(min_yield=self.min_yield[-1], steps_2_show=steps_2_show, j=j,
+                      loops_2_show=loops_2_show,c=c)
             _, idx = self.update_min_yield(self.original_seq)
             self.change_lowest_yield_sequence_configuration(idx)  # change to another sequence in the configuration
             self.update_nb_mutations()
 
             if j in loops_2_show:
-                sm.take_snapshot(self=self,loop_nb=j)
+                dm.take_snapshot(self=self,loop_nb=j,c=c)
+                dm.zip_data(c=c)
+                pm.make_heat_map(df=self.original_seq,c=c, loop_nb=j)
+
+
 
         # TODO: plot the rate of change of min yield as well ...
-        pm.make_min_yield_plot(dir_name=self.dir_name,min_yield_lst=self.min_yield,N_loops=N_loops)
+        pm.make_min_yield_plot(min_yield_lst=self.min_yield,c=c)
+        pm.make_percent_positive_plot(c=c,percent_pos=self.percent_pos)
 
-        pm.make_percent_positive_plot(dir_name=self.dir_name,N_steps=N_steps, N_loops=N_loops,
-                                      percent_pos=self.percent_pos)
+        self.times.to_pickle(path=dm.make_file_name(c=c,file_description='times',fileformat='pkl'))
 
-        self.times.to_pickle(path=pm.make_file_name(dir_name=self.dir_name,file_description='times',fileformat='pkl'))
-
-        sm.zip_data(dir_name=self.dir_name)
         return self.times
 
     def update_nb_mutations(self):
@@ -132,18 +136,10 @@ class nested_sampling(ABC):
                 self.nb_mutations.append(self.nb_mutations[-1] + 1)
 
     @abstractmethod
-    def walk(self, min_yield, steps_2_show, N_loops, loops_2_show, N_steps=10, j=1):
+    def walk(self, min_yield, steps_2_show,c, loops_2_show,j):
         'abstract method, must define in sublclass how to walk/mutate'
         pass
 
-    def init_walk(self, j, steps_2_show, loops_2_show):
-        # i should always be equal to zero here
-        if j == 0:
-            print('finding min yield of init sequences')
-            self.original_seq = self.get_yield().copy()
-            self.update_min_yield(self.original_seq)
-        if j in loops_2_show and 0 in steps_2_show:
-            pm.make_heat_map(df=self.original_seq,dir_name=self.dir_name,loop_nb=j)
     # private methods
     def get_yield(self):
         'gets the predicted yield from a model'
@@ -190,7 +186,7 @@ class nested_sampling(ABC):
         print('starting timer')
         self.start_time = time.time()
 
-    def stop_timer(self, loops_2_show, j, i=None, ):
+    def stop_timer(self, loops_2_show, j, i=None ):
         print('stop timer')
         stop_time = time.time() - self.start_time
         if j in loops_2_show:
@@ -234,7 +230,7 @@ class ns_random_sample(nested_sampling):
         #self.nb_mutations=nb_mutations
 
 
-    def walk(self, min_yield, steps_2_show, loops_2_show, N_loops, N_steps=10, j=1):
+    def walk(self, min_yield,j, steps_2_show, loops_2_show,c):
         'this is a random walk that makes one mutation at a time'
 
         # here make min_yield a local parameter,  it is required
@@ -243,8 +239,8 @@ class ns_random_sample(nested_sampling):
         #TODO: easy parallelization using joblib library
         #TODO: make self.test_seq a local parameter...
         percent_pos = []
-        for i in np.arange(N_steps):
-            print('loop %i of %i, step %i of %i' % (j + 1, N_loops, i + 1, N_steps))
+        for i in np.arange(c.nb_steps):
+            print('loop %i of %i, step %i of %i' % (j + 1, c.nb_loops, i + 1, c.nb_steps))
             self.start_timer()
             print('making %i mutations'%self.nb_mutations[-1])
             for k in np.arange(self.nb_mutations[-1]):

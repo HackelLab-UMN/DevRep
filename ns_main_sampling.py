@@ -16,11 +16,9 @@ def driver(c,suppress_output=False):
         with suppress_stdout():
             # TODO :  is to remove this and just have the class input, it would be so much cleaner
             #   that way
-            trial1.nested_sample(N_loops=c.nb_loops,N_steps=c.nb_steps,loops_2_show=loops_2_show,mutation_type=c.mutation_type,
-                                 nb_mutations=c.nb_mutations)
+            trial1.nested_sample(c=c,loops_2_show=loops_2_show)
     else:
-        times =  trial1.nested_sample(N_loops=c.nb_loops,N_steps=c.nb_steps,loops_2_show=loops_2_show,mutation_type=c.mutation_type,
-                                 nb_mutations=c.nb_mutations)
+        times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)
         print(times)
 
 @contextmanager

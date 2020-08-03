@@ -48,17 +48,22 @@ def unzip_data(dir_name):
     if os_out == 0:
         print('sucessfully unzipped data for ' + dir_name)
 
+
+
+
+
+
+
+
+
 #TODO: make some file that says what files need to be pulled from msi, but that would be advanced.
 #zip_data(dir_name=sm.make_directory(Nb_steps=5,Nb_loops=3))
 # push_scripts(['main_DevRep_example.py'])
 
-
-# TODO: somewhere this is imported find it and remove it.
-
 #push_scripts(['ns_main_sampling.py','submodels_module.py'])
 # note you should only push
-# push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
-pull_zipped_data(nb_steps=5,nb_loops=10000,nb_mutations=6,mutation_type='static')
+push_scripts(['input_deck.py','ns_sampling_modules.py'])
+#pull_zipped_data(nb_steps=5,nb_loops=10000,nb_mutations=6,mutation_type='static')
 #push_scripts(['submodels_module.py','ns_main_sampling.py'])
 
 #pull_output_script(job_nb=21795057
