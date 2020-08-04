@@ -20,7 +20,7 @@ def driver(c,suppress_output=False):
     else:
         times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)
         print(times)
-
+        return times
 @contextmanager
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
@@ -43,9 +43,11 @@ def check_inputs(c):
         raise AttributeError('Invalid # of mutations: %i'%c.nb_mutations)
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
-c=inputs()
-check_inputs(c=c)
-driver(c=c)
+
+
+# c=inputs()
+# check_inputs(c=c)
+# driver(c=c)
 
 
 

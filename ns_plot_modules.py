@@ -62,9 +62,10 @@ def violin_saved_dataset(c,loops_2_show,y_lim=None):
         start=start+1
     ax.legend(['Threshold'])
     fig.tight_layout()
-    print('saving ' +dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings))
-    fig.savefig(dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings))
+    print('saving ' +dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings,fileformat='png'))
+    fig.savefig(dm.make_file_name(c=c,file_description='violin_plot_nb_strings_%i'%nb_strings,fileformat='png'))
     plt.close(fig)
+
 
 
 

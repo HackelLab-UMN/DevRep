@@ -1,9 +1,8 @@
 import ns_sampling_modules as sm
 import os
 from ns_password import PASSWORD,MSI_DIRECTORY,LOCAL_DIRECTORY
-
-#OUT_SCRIPT= os.path.dirname(MSI_DIRECTORY)+'/ns_nested_sampling_CPU.pbs.o'
-
+import ns_data_modules as dm
+from input_deck import inputs
 password='sshpass -p '+PASSWORD
 
 def push_scripts(scripts=None):
@@ -18,9 +17,8 @@ def push_scripts(scripts=None):
         else:
             raise SystemError('error transferring file : ' + i + ' to ' + MSI_DIRECTORY)
 
-def pull_zipped_data(nb_steps,nb_loops,nb_sequences=1000,nb_mutations=1,mutation_type='static'):
-    dir_name=sm.make_directory(Nb_steps=nb_steps, Nb_loops=nb_loops,nb_sequences=nb_sequences,
-                               nb_mutations=nb_mutations,mutation_type=mutation_type)
+def pull_zipped_data(c):
+    dir_name=dm.make_directory(c)
     src= MSI_DIRECTORY + '/sampling_data/' + dir_name + '/' + dir_name + '.zip'
     target= LOCAL_DIRECTORY + '/sampling_data/' + dir_name
     os.system('mkdir '+target)
@@ -53,7 +51,8 @@ def unzip_data(dir_name):
 
 
 
-
+c=inputs()
+pull_zipped_data(c=c)
 
 
 #TODO: make some file that says what files need to be pulled from msi, but that would be advanced.
@@ -62,7 +61,8 @@ def unzip_data(dir_name):
 
 #push_scripts(['ns_main_sampling.py','submodels_module.py'])
 # note you should only push
-push_scripts(['input_deck.py','ns_sampling_modules.py'])
+#push_scripts(['input_deck.py'])
+#pull_output_script(job_nb=22177757)
 #pull_zipped_data(nb_steps=5,nb_loops=10000,nb_mutations=6,mutation_type='static')
 #push_scripts(['submodels_module.py','ns_main_sampling.py'])
 

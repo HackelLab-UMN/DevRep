@@ -13,12 +13,12 @@
 # specify inputs right here
 #TODO: make ability to init anywhree ?
 class inputs():
-    def __init__(self):
+    def __init__(self,nb_loops,nb_steps,mutation_type,nb_mutations,Nb_sequences=1000):
         #just make all the rest of the parameters besides nb_sequences
         # have the ability to be initilized to different values
-        self.nb_loops=3
-        self.nb_steps=3
-        self.nb_snapshots=3
-        self.mutation_type= 'dynamic'
-        self.nb_mutations=10
-        self.Nb_sequences=1000
+        self.nb_loops=nb_loops
+        self.nb_steps=nb_steps
+        self.nb_snapshots=1
+        self.mutation_type= mutation_type
+        self.nb_mutations=nb_mutations
+        self.Nb_sequences=Nb_sequences

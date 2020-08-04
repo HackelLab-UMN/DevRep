@@ -55,7 +55,6 @@ class nested_sampling(ABC):
         self.run_stats=pd.DataFrame({'e2y'})
 
     def nested_sample(self, c,steps_2_show=None, loops_2_show=None):
-        c=inputs()
         'main method to call, does nested sampling'
         # TODO: describe what the inputs should be ...
         # this is the loop I would like to have done by the end of today. So that a driver script can just call this
