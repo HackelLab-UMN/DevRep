@@ -8,6 +8,7 @@ from input_deck import inputs
 
 
 def driver(c,suppress_output=False):
+    check_inputs(c=c)
     trial1 = ns.ns_random_sample(Nb_sequences=c.Nb_sequences)
     step = c.nb_loops // c.nb_snapshots
     loops_2_show=np.arange(0,c.nb_loops+step,step)
@@ -45,9 +46,16 @@ def check_inputs(c):
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
 
-# c=inputs()
-# check_inputs(c=c)
-# driver(c=c)
+c=inputs(nb_loops=2,
+         nb_steps=3,
+         mutation_type='static',
+         nb_mutations=1,
+         nb_snapshots=2,
+         Nb_sequences=1000)
+
+driver(c=c)
+
+
 
 
 

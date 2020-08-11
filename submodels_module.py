@@ -48,12 +48,12 @@ class x_to_yield_model(model):
         self.sample_seed=seed
         self.update_model_name('seed'+str(seed)+'_'+self.model_name)
 
-    def save_predictions(self, input_df_description=None, df=None, df_emb=False, sampling_nb=None):
+    def save_predictions(self, input_df_description=None, df=None, df_emb=False, model_nb=None):
         'saves model predictions for the large dataset'
         # Inputs: input_df_description: input dataframe description
         #         df: a dataframe for monte carlo sampling
         #         df_emb: a boolean if df is just meant for monte carlo sampling
-        #         sampling_nb:
+        #         model_nb:
         if input_df_description is None and df_emb is False:  # default for the non sampling case
             input_df_description = 'seq_to_assay_train_'+self.assay_str #only a certain number of these files exist, but more can be created
             df = load_format_data.load_df(input_df_description)  # will have to adjust if missing datapoints
@@ -61,8 +61,8 @@ class x_to_yield_model(model):
             df = load_format_data.load_df('predicted/' + input_df_description)  # for using predicted embeddings
             x_a = self.get_input_seq(df)
         else:  # this is for monte carlo sampling, df is a dataframe with attributes 'Ordinals' and
-            # 'learned_sampling_'sampling_nb''
-            x_a = self.get_input_seq(df, sampling_nb)
+            # 'learned_sampling_'model_nb''
+            x_a = self.get_input_seq(df, model_nb)
 
         OH_matrix = np.eye(2)
         matrix_col = ['IQ_Average_bc', 'SH_Average_bc']
@@ -147,11 +147,13 @@ class x_to_assay_model(model):
                 df.loc[:,'Sort'+str(self.assays[i])+'_mean_score']=df_prediction
             df.to_pickle('./datasets/predicted/seq_to_dot_test_data_'+self.model_name+'_'+str(z)+'.pkl')
 
-    def save_sequence_embeddings(self, df_list=None, is_ordinals_only=False):
+    def save_sequence_embeddings(self, df_list=None, is_ordinals_only=False,nb_models=None):
         'save sequence embeddings of model'
         # df_list: must either be a list of strings to load dataframes
         #          of a list of dataframes
         # is_ordinals_only: True if it just ordinals [default: false]
+        if nb_models is None:
+            nb_models=3
         if not df_list:
             df_list = ['assay_to_dot_training_data', 'seq_to_dot_test_data','seq_to_assay_train_1,8,10']
         OH_matrix = np.eye(len(self.assays))
@@ -161,18 +163,24 @@ class x_to_assay_model(model):
             else:
                 df = load_format_data.load_df(df_name)
             x_a = self.get_input_seq(df)
-            for z in range(3):  # for each model
+            for z in range(nb_models):  # for each model
                 for i in range(1):  # only need to get cat var for one assay to get sequence embedding
                     cat_var = []
                     for j in x_a:  # for each sequence add cat_var
                         cat_var.append(OH_matrix[i].tolist())
                     x = load_format_data.mix_with_cat_var(x_a, cat_var)
-                    self._model.set_model(self.get_best_trial()['hyperparam'], xa_len=len(x[0]) - len(cat_var[0]),
-                                          cat_var_len=len(cat_var[0]),
-                                          lin_or_sig=self.lin_or_sig)  # need to build nn arch
-                    self.load_model(z)  # load pkled sklearn model or weights of nn model
+                    # self._model.set_model(self.get_best_trial()['hyperparam'], xa_len=len(x[0]) - len(cat_var[0]),
+                    #                       # xa_len - 16
+                    #                       cat_var_len=len(cat_var[0]), # cat_var_len - 3 [1,8,10]
+                    #                       lin_or_sig=self.lin_or_sig)  # need to build nn arch,
+                    #self.load_model(z)  # load pkled sklearn model or weights of nn model , set z to zero.
+
                     seq_embedding_model = self._model.get_seq_embeding_layer_model()
+
+                    #170-176 : only have to call one time!!!  have to make this global ...
                     df_prediction = seq_embedding_model.predict([x])
+
+
                     seq_emb_list = []
                     for i in df_prediction:
                         seq_emb_list.append([i])
@@ -344,3 +352,6 @@ class final_sequence_embeding_to_yield_model(sequence_embeding_to_yield_model):
         super().__init__(seq_to_assay_model_prop, model_architecture, sample_fraction)
         self.update_model_name('final'+self.model_name)
         self.switch_train_test()
+
+
+

@@ -9,17 +9,18 @@ import os
 import ns_sampling_modules as sm
 from ns_password import LOCAL_DIRECTORY
 import ns_data_modules as dm
-
+from   input_deck import names
+fn=names()
 
 def violin_saved_dataset(c,loops_2_show,y_lim=None):
     'nb strings is the number of strings in the violin plot'
     # first make the directory and get all the pkl files
     if y_lim is None:
-        y_lim = [-1, 1.5]
-    df_pp = pd.read_pickle(path=dm.make_file_name(c=c,file_description='percent_pos_average'))
-    pp = sm.convert2numpy(df=df_pp, field='percent pos average')
-    df_min_yield =pd.read_pickle(path=dm.make_file_name(c=c,file_description='min_yield'))
-    min_yield=sm.convert2numpy(df=df_min_yield,field='min_yield')
+        y_lim = [-1.5, 2]
+    df_pp = pd.read_pickle(path=dm.make_file_name(c=c,file_description=fn.pp_fn))
+    pp = sm.convert2numpy(df=df_pp, field=fn.pp_fn)
+    df_min_yield =pd.read_pickle(path=dm.make_file_name(c=c,file_description=fn.min_yield_fn))
+    min_yield=sm.convert2numpy(df=df_min_yield,field=fn.min_yield_fn)
 
     # make the figure
     fig,ax=plt.subplots(1, 1, figsize=[5, 3], dpi=300)
@@ -32,7 +33,7 @@ def violin_saved_dataset(c,loops_2_show,y_lim=None):
 
         n=loops_2_show[k]
 
-        df=pd.read_pickle(path=dm.make_file_name(c=c,file_description='sequences_loop_'+str(loops_2_show[k])))
+        df=dm.read_pickle(c=c,file_description='sequences_loop_'+str(loops_2_show[k]))
         dev=sm.convert2numpy(df=df,field='Developability')
         violin_parts =ax.violinplot([dev], positions=[k], showmedians=False,
                                                        showextrema=False, points=100,
@@ -153,7 +154,7 @@ def heat_map_plot(frequency,c,loop_nb):
         ['7', '8', '9', '9b', '9c', '10', '11', '12', '34', '35', '36', '36b', '36c', '37', '38', '39', 'Loop 1 (8-11)',
          'Loop 2 (34-39)', 'Loop 1 & Loop 2']]
 
-    fig, ax = plt.subplots(1, 1, figsize=[6.5, 3], dpi=300)
+    fig, ax = plt.subplots(1, 1, figsize=[5, 3], dpi=300)
     cmap = mpl.cm.Reds
     cmap.set_bad('black')
 

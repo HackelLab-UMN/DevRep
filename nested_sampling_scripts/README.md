@@ -12,10 +12,10 @@ instructions to create the environment are in the file.
 3. run script `main_DevRep_example.py`, this will save learned embedding pickle files to `/datasets/predicted`.
 4. if not already present make a directory `/DevRep/sampling_data`. This is where results of a `ns_main_sampling.py` will 
 be stored. 
-3. go into `ns_main_sampling.py` to specify the Number of loops (`N_loops`) to use, and number of 
+3. go into `input_deck.py` to specify the Number of loops (`N_loops`) to use, and number of 
 steps to use(`N_steps`), number of sequences (`nb_sequences`), and number of snapshots to 
- take (`nb_snapshots`)for a given run. Can also toggle output. 
-4. To see results not in the form of pkl files, run `ns_show_results.py`
+ take (`nb_snapshots`)for a given run. Can also toggle output to console for run. 
+4. To see results as plots, run `ns_show_results.py`. 
 4. To change model parameters, go into `ns_nested_sampling.py` and change the model parameters 
 `e2y` and `s2a` in initilization of `nested_sampling` class. 
 5. If running on MSI, functions are provided to easily transfer small files 
@@ -42,4 +42,9 @@ University of Minnesota -Twin Cities - CEML - Martiniani Lab
 
 Version 0.3 - **not stable** - 7/27/2020 
 
+
+##Notes
+
+-Must init a new e2y model for every model that one has. This doesn't have to be between steps. 
+Just for a model. 
 

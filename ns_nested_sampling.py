@@ -13,11 +13,12 @@ import matplotlib as mpl
 mpl.use('Agg')
 from input_deck import  inputs
 import ns_data_modules as dm
+import ns_submodels_module as ns_mb
 tf.config.optimizer.set_jit(True)
 
 class nested_sampling(ABC):
     # main method is to call is walk()
-    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16):
+    def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16,nb_models=1):
         # TODO: check times for different number of sequences
         'nested sampling initilization for number of sequences and number of positions of ordinals'
         # initilize default model parameters
@@ -25,7 +26,6 @@ class nested_sampling(ABC):
             e2y_params = ['svm', 1]
         if s2a_params is None:
             s2a_params = [[1, 8, 10], 'emb_cnn', 1]
-
         # note: things may change between tensorflow versions
         seed_parent = int.from_bytes(os.urandom(4), sys.byteorder)
         self.g_parent = tf.random.experimental.Generator.from_seed(seed_parent)
@@ -38,10 +38,18 @@ class nested_sampling(ABC):
         self.nb_of_sequences = Nb_sequences
         self.test_seq = self.original_seq.copy()
         # self.nb_of_sequences,_=np.shape(self.original_seq['Ordinal'])
+        self.nb_models=nb_models
 
-        self.s2a = mb.seq_to_assay_model(*s2a_params)
+        # todo: should have for loop here for multiple s2a models, so that then your not constantly loading models
+        self.s2a = ns_mb.ns_seq_to_assay_model(s2a_params)
+        self.s2a.init_sequence_embeddings()
+
         # i'm putting zero here b/c it requires a parameter...
-        self.e2y = mb.sequence_embeding_to_yield_model(s2a_params + [0], *e2y_params)
+        self.e2y=[]
+        for i in np.arange(self.nb_models):
+            self.e2y.append(ns_mb.ns_sequence_embeding_to_yield_model(s2a_params + [i], e2y_params))
+            self.e2y[-1].init_e2y_model()
+
         self.times = pd.DataFrame()
         self.start_time = None
         self.min_yield = []
@@ -85,7 +93,7 @@ class nested_sampling(ABC):
 
         # TODO: figure out the orginal_seq and test_seq craziness... honestly test sequence
         #  should just be a local parameter to the walk. not a local to the class one... that would look much better ..
-
+        loops_done=[]
         for j in np.arange(c.nb_loops):
             print('LOOP %i of %i loops' % (j, c.nb_loops))
             #TODO: change the order of these so you are taking a snapshot and initing the walk at the right time
@@ -100,7 +108,8 @@ class nested_sampling(ABC):
             self.update_nb_mutations()
 
             if j in loops_2_show:
-                dm.take_snapshot(self=self,loop_nb=j,c=c)
+                loops_done.append(j)
+                dm.take_snapshot(self=self,loop_nb=j,c=c,loops_done=loops_done)
                 dm.zip_data(c=c)
                 pm.make_heat_map(df=self.original_seq,c=c, loop_nb=j)
 
@@ -122,7 +131,7 @@ class nested_sampling(ABC):
             last_pp = sum(self.percent_pos[-1]) / len(self.percent_pos[-1]) *100
             if last_pp < 20 and self.nb_mutations[-1] > 0:
                 self.nb_mutations.append(self.nb_mutations[-1] - 1)
-            elif last_pp > 20 and last_pp < 30:
+            elif (last_pp > 20 and last_pp < 30) or self.nb_mutations[-1]>16: # shouldn't have more than 16 unique mutations
                 self.nb_mutations.append(self.nb_mutations[-1])
             else:
                 self.nb_mutations.append(self.nb_mutations[-1] + 1)
@@ -133,16 +142,25 @@ class nested_sampling(ABC):
         pass
 
     # private methods
-    def get_yield(self):
+    def get_yield(self,df_only=None):
         'gets the predicted yield from a model'
-        df_with_embbeding = self.s2a.save_sequence_embeddings(df_list=[self.test_seq], is_ordinals_only=True)
+        if df_only is None :
+            df=self.test_seq.copy()
+        else :
+            df=df_only
+
+        df_with_embbeding = self.s2a.save_sequence_embeddings(df_list=df)
 
         predicted_yield_per_model = []
-        for i in np.arange(3):
-            predicted_yield_per_model.append(
-                self.e2y.save_predictions(df=df_with_embbeding, df_emb=True, sampling_nb=i))
-        self.test_seq['Developability'] = np.copy(np.average(predicted_yield_per_model, axis=0))
-        return self.test_seq
+        for e2y in self.e2y:
+            predicted_yield_per_model.append(e2y.save_predictions(input_df_description=df_with_embbeding))
+        df['Developability'] = np.copy(np.average(predicted_yield_per_model, axis=0))
+
+        if df_only is None:
+            self.test_seq=df.copy()
+
+        return df
+
 
     def update(self, min_yield):
         'updates the sequences based on if they are higher than the last minimum yield'
@@ -213,8 +231,8 @@ class nested_sampling(ABC):
     #     return np.sum(self.percent_pos,axis=0)/len(self.percent_pos[0])
 class ns_random_sample(nested_sampling):
     # nested sampling random sampling implementation.
-    def __init__(self,Nb_sequences):
-        super().__init__(Nb_sequences=Nb_sequences)
+    def __init__(self,Nb_sequences=1000,nb_models=1):
+        super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
         # initilize generator
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
         # note: things may change between tensorflow versions

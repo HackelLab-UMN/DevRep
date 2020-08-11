@@ -8,3 +8,6 @@ source activate awg
 
 cd ./DevRep
 python3 ns_main_sampling.py $PBS_ARRAYID
+python3 ns_show_results.py $PBS_ARRAYID
+
+

@@ -4,7 +4,7 @@ import tensorflow as tf
 import os
 import sys
 import ns_plot_modules as pm
-
+tf.config.optimizer.set_jit(True)
 
 def incorrect_blanks(random_AA, random_AA_pos, seq):
     'return a logical array , where true means an invalid sample'

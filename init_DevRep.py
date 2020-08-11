@@ -20,7 +20,7 @@ for file in zip_files:
 
 
 # now much save the learned_embedding_*.pkl files for the best model.
-
+# todo:  this is incorrect ... neeed to run main_DevRep_example.py
 # set pandas df of sequences to be predicted, must contain a "Ordinal" column of paratope
 # the file should be saved under /datasets/
 df=['seq_to_assay_train_1,8,10'] #this is just an example

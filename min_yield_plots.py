@@ -1,6 +1,3 @@
-
-
-
 import ns_data_modules as dm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
