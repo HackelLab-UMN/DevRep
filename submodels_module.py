@@ -4,7 +4,7 @@ from functools import partial
 from model_module import model
 import load_format_data
 import plot_model
-
+##
 ## The foolowing classes are considered LIST_B classes:
 ## seq_to_x_model , assay_to_x_model , control_to_x_model , sequence_embedding _to_x_model
 class seq_to_x_model():

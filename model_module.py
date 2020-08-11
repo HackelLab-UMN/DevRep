@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error as mse
 import load_format_data
 from model_architectures import get_model
 from plot_model import x_to_yield_plot
-
+##
 class model:
     '''The model class will cross-validate the training set to determine hyperparameters
     then use the set hyperparameters to evaluate against a test set and save predictions''' 

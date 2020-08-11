@@ -1,6 +1,6 @@
 import pandas as pd 
 from scipy.stats import ttest_ind_from_stats as ttest
-
+##
 def main():
     cv_scores=pd.read_csv('./aty_best_arch_cv.csv',index_col=0)
     cv_scores.columns=['model_name','cv_loss','cv_std']

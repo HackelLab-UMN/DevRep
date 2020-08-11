@@ -3,8 +3,8 @@ import matplotlib as mpl
 mpl.use('Agg')
 ## This sets a non-interactive backend gigving image outputs of constructed graphs
 import matplotlib.pyplot as plt
-## Module inteded fot progammic plot generation
-
+## Module inteded for progammic plot generation
+##
 class model_plot():
 ## A new object of type model_plot to create a blank uncharted plot
     def colorbar(self,mappable):
