@@ -1,6 +1,12 @@
 # DevRep
-Gp2 Developability Modeling, Hackel Lab Univ. of Minnesota
-Lead contact: Alex Golinski golin010@umn.edu
+
+Gp2 Developability Modeling, Lead Author: Alexander Golinski 
+
+Contact Information
+golin010@umn.edu
+
+Hackel & Martiniani Labs
+University of Minnesota
 
 This project contains Python3 scripts used to predict the yield of Gp2 paratope variants 
 utilizing high-throughput developability assays.
@@ -15,8 +21,7 @@ can be found in ./main_paper_one/
 The additional code for aim two of the project, creating a sequence-based model to predict yield 
 via transfer learning of DevRep, can be found in ./main_paper_two/
 
-Both files in the main_paper_* folders need to me moved to the main directory to run. 
-Required packages are included in the conda_package_list.txt file
+Files in ./main_paper_*/ folders need to me moved to the main directory to run. 
 
 For non-top performing models, saved hyperparameter trials and model stats can be found within the zipped folder in the repective folders.
 
