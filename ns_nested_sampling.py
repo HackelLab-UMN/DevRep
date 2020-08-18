@@ -67,7 +67,16 @@ class nested_sampling(ABC):
         # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
 
-    def nested_sample(self, c,steps_2_show=None, loops_2_show=None):
+    def nested_sample(self, c, loops_2_show=None):
+        '''
+        top function to call when making a nested sampling run
+        will save run_stats to a /sampling_data/<new dir>
+        where <new dir>  is the directory for the run.
+
+        :param c: inputs() object [describes the inputs]
+        :param loops_2_show: ndarray of loops to show
+        :return: the run times for the loops in loops to show as a pandas Dataframe
+        '''
         'main method to call, does nested sampling'
         # TODO: describe what the inputs should be ...
         # this is the loop I would like to have done by the end of today. So that a driver script can just call this
@@ -78,23 +87,16 @@ class nested_sampling(ABC):
         self.mutation_type.append(c.mutation_type)
 
         self.dir_name= dm.make_directory(c=c)
-
-
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
 
 
-        if steps_2_show is None:
-            # default is to show 3 steps
-            steps_2_show = np.array([0, c.nb_steps // 2, c.nb_steps])
-            steps_2_show = np.unique(steps_2_show).copy()
         if loops_2_show is None:
             # default is to show 3 loops
             loops_2_show = np.array([0, c.nb_loops // 2, c.nb_loops-1])
             loops_2_show =np.unique(loops_2_show).copy()
 
 
-        dm.save_run_stats(c=c,steps_2_show=steps_2_show,
-                          loops_2_show=loops_2_show)
+        dm.save_run_stats(c=c,loops_2_show=loops_2_show)
 
         # TODO: figure out the orginal_seq and test_seq craziness... honestly test sequence
         #  should just be a local parameter to the walk. not a local to the class one... that would look much better ..
@@ -106,7 +108,7 @@ class nested_sampling(ABC):
                 self.original_seq = self.get_yield().copy()
                 self.update_min_yield(self.original_seq)
 
-            self.walk(min_yield=self.min_yield[-1], steps_2_show=steps_2_show, j=j,
+            self.walk(min_yield=self.min_yield[-1], j=j,
                       loops_2_show=loops_2_show,c=c)
             _, idx = self.update_min_yield(self.original_seq)
             self.change_lowest_yield_sequence_configuration(idx)  # change to another sequence in the configuration
@@ -129,6 +131,13 @@ class nested_sampling(ABC):
         return self.times
 
     def update_nb_mutations(self):
+        '''
+        when making multiple mutations , this determines how the number of mutations should change.
+        right now if dynamic --- > if less than 20% loose a mutation
+                                    if 20-30% then don't do anything
+                                    if >30% , add a mutation until 16 mutations
+        :return:appends to self.nb_mutations list
+        '''
         if self.mutation_type[-1] is 'static':
             self.nb_mutations.append(self.nb_mutations[-1])
         elif self.mutation_type[-1] is 'dynamic':
@@ -142,13 +151,21 @@ class nested_sampling(ABC):
                 self.nb_mutations.append(self.nb_mutations[-1] + 1)
 
     @abstractmethod
-    def walk(self, min_yield, steps_2_show,c, loops_2_show,j):
+    def walk(self, min_yield,c, loops_2_show,j):
         'abstract method, must define in sublclass how to walk/mutate'
         pass
 
     # private methods
     def get_yield(self,df_only=None):
-        'gets the predicted yield from a model'
+        '''
+        gets the predicted yield from a model
+        uses the models specified in the constructor for s2a and e2y.
+        e2y must have a seperate intilization for each model.
+        :param df_only: if just passing in the data frame// not nested sampling
+        :return: updates self.test_seq if running nested_sampling() function. otherwise updates
+        the dataframe with 'developability' column.
+        '''
+
         if df_only is None :
             df=self.test_seq.copy()
         else :
@@ -167,7 +184,13 @@ class nested_sampling(ABC):
 
 
     def update(self, min_yield):
-        'updates the sequences based on if they are higher than the last minimum yield'
+        '''
+        updates the sequences based on if they are higher than the last minimum yield
+        :param min_yield: current threshold
+        :return: will update original sequence based on if developability parameter found from self.test_seq was
+        higher than thershold.
+
+        '''
         print('updating the sequences based on last minimum yield')
         print('current minimum yield is  %0.2f' % min_yield)
         # convert the pandas columns to numpy arrays so no for loops  :/
@@ -207,6 +230,11 @@ class nested_sampling(ABC):
             self.times.loc[i, str(j+1) + 'th loop'] = stop_time
 
     def update_min_yield(self, seq):
+        '''
+
+        :param seq: pandas Dataframe containing the Developability column
+        :return: the newest threshold value, the index of the lowest yield value to be changed
+        '''
         print('update the minimum yield.. updating self.min_yield %0.2f' % np.min(
             seq['Developability'].to_numpy().tolist()))
         # consider making the update of the min yield...
@@ -216,6 +244,11 @@ class nested_sampling(ABC):
         return self.min_yield[-1], np.argmin(seq['Developability'].to_numpy().tolist())
 
     def change_lowest_yield_sequence_configuration(self, idx):
+        '''
+
+        :param idx: index of sequence with lowest yield
+        :return: updates self.original_seq['Ordinal']
+        '''
         print('resampling sequence with lowest min yield, seq idx: %i' % idx)
         change_2_seq = idx
         # idk if any of those syntax is correct ...
@@ -234,7 +267,7 @@ class nested_sampling(ABC):
     # def get_percent_pos_average(self):
     #     return np.sum(self.percent_pos,axis=0)/len(self.percent_pos[0])
 class ns_random_sample(nested_sampling):
-    # nested sampling random sampling implementation.
+    # random sampling
     def __init__(self,Nb_sequences=1000,nb_models=1):
         super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
         # initilize generator
@@ -244,8 +277,15 @@ class ns_random_sample(nested_sampling):
         self.rng = np.random.default_rng()
         #self.nb_mutations=nb_mutations
        # self.rng_times=pd.DataFrame()
-    def walk(self, min_yield,j, steps_2_show, loops_2_show,c):
-        'this is a random walk that makes one mutation at a time'
+    def walk(self, min_yield,j, loops_2_show,c):
+        '''
+        method to define how to do a random walk , here we also use rejection sampling.
+        :param min_yield: the current threshold
+        :param j: loop number
+        :param loops_2_show: ndarray of loops to show , based on number of snapshots
+        :param c: inputs() object
+        :return: update current self.original_seq ordinal and developability column's
+        '''
 
         # here make min_yield a local parameter,  it is required
         # N is the number of iterations , can update in the future to do an actual convergence algorithm
@@ -271,7 +311,7 @@ class ns_random_sample(nested_sampling):
         '''
 
         :param nb_mutations: number of mutations to make
-        :return: calls to self.mutate will cause changes to 'Ordinal' column of self.test_seq
+        :return: repetetive calls to self.mutate will cause changes to 'Ordinal' column of self.test_seq
 
         '''
        # start=time.time()
@@ -292,7 +332,11 @@ class ns_random_sample(nested_sampling):
        # self.rng_times.loc[i,'%i loop'%(j+1)]=total
 
     def mutate(self,random_AA_pos=None):
-        'mutate the sequences where necessary, this is a random mutation'
+        '''
+        :param random_AA_pos: ndarray [Number of sequences x 1]  specifies which random positions
+         to change for each sequence
+        :return: make changes to self.test_seq['Ordinal'] based on a single mutation for each sequence
+        '''
         # mutate every sequence of the original
         # for a mutation to occur ;
         # pseudo random number

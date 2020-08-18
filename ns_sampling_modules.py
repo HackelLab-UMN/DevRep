@@ -107,14 +107,13 @@ def sample(nb_of_sequences, Nb_positions, generator,minval=0,maxval=21):
 
 def make_sampling_data(generator, Nb_sequences=1000, Nb_positions=16):
     '''
-
-    :param generator: tensorflow.random.experimental generator v2.0
-    :param Nb_sequences:
-    :param Nb_positions:
+    make sampling data and then remove all the illegal blanks
+    :param generator: tensorflow.random.experimental generator from v2.0
+    :param Nb_sequences: specify number of sequences
+    :param Nb_positions: specifies number of positions
     :return: return ordinals in pandas format
 
     '''
-    'make sampling data and then remove all the blanks'
     seq = sample(nb_of_sequences=Nb_sequences, Nb_positions=Nb_positions, generator=generator)
     for k in np.arange(Nb_positions):
         # at the kth position in every sequence
@@ -124,7 +123,7 @@ def make_sampling_data(generator, Nb_sequences=1000, Nb_positions=16):
 
 
 def _unit_tests_accuracy_blank_removal():
-    'this is a unit test for removal of blanks, not for actual usage.'
+    'this is a unit test for removal of blanks, not for actual usage. Not to be implemented.'
     seed_parent = int.from_bytes(os.urandom(4), sys.byteorder)
     g_parent = tf.random.experimental.Generator.from_seed(seed_parent)
     seq = np.array([[0, 0, 0, 19, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

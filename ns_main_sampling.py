@@ -39,17 +39,17 @@ def check_inputs(c):
         raise AttributeError('Number of snapshots is greater than Number of loops')
     if c.mutation_type != 'static' and c.mutation_type!='dynamic':
         raise AttributeError('invalid mutations type: %s'%c.mutation_type)
-    if c.nb_mutations<0:
+    if c.nb_mutations<0 or c.nb_mutations>16:
         raise AttributeError('Invalid # of mutations: %i'%c.nb_mutations)
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=10000,
+c=inputs(nb_loops=20000,
          nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=10,
          nb_snapshots=25,
-         Nb_sequences=1000)
+         Nb_sequences=10000)
 
 if sys.platform=='darwin':
     suppress_output = False
