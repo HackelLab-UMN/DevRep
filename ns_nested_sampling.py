@@ -14,8 +14,11 @@ mpl.use('Agg')
 from input_deck import  inputs
 import ns_data_modules as dm
 import ns_submodels_module as ns_mb
+from joblib import wrap_non_picklable_objects
 tf.config.optimizer.set_jit(True)
 
+
+# @wrap_non_picklable_objects
 class nested_sampling(ABC):
     # main method is to call is walk()
     def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16,nb_models=1):
@@ -155,7 +158,6 @@ class nested_sampling(ABC):
         for e2y in self.e2y:
             predicted_yield_per_model.append(e2y.save_predictions(input_df_description=df_with_embbeding))
         df['Developability'] = np.copy(np.average(predicted_yield_per_model, axis=0))
-
         if df_only is None:
             self.test_seq=df.copy()
 

@@ -7,7 +7,13 @@ import ns_plot_modules as pm
 tf.config.optimizer.set_jit(True)
 
 def incorrect_blanks(random_AA, random_AA_pos, seq):
-    'return a logical array , where true means an invalid sample'
+    '''
+    :param random_AA: Nx1 ndarray of suggested AA to change to
+    :param random_AA_pos: Nx1 ndarray of random Amino acid positions
+    :param seq:Nx16 ndarray current sequences before mutations
+    :return: logical, where true means an invalid sample
+    '''
+
     # make sure that its in position 3,4,11,12
     # and if its in position 4,
     # make sure 3 is 19 otherwise resample
@@ -55,6 +61,10 @@ def remove_blanks(random_AA_pos, random_AA, seq, generator):
 
 
 def convert2pandas(ordinals_np):
+    '''
+    :param ordinals_np: numpy array to transition to pandas column
+    :return: pandas wierd format
+    '''
     ord_pd = []
     # make a list of tuples
     for i in ordinals_np:
@@ -63,8 +73,29 @@ def convert2pandas(ordinals_np):
 
 
 def convert2numpy(df, field='Ordinal'):
+    '''
+    :param df: pandas dataframe
+    :param field: column to transmit to numpy array
+    :return: returns numpuy array
+    '''
     return np.copy(np.array(df[field].to_numpy().tolist()))
+def splitPandas(df,nb_splits=10):
+    '''
 
+    :param df: dataframe to split
+    :param nb_splits: number of splits to do to dataset for parrelel processing
+    :return: list of dataframes
+
+    '''
+    field='Ordinal'
+    seq=convert2numpy(df=df,field=field)
+    lst=np.array_split(seq,indices_or_sections=nb_splits,axis=0)
+    return list(map(pandas_dataframe,lst))
+
+def pandas_dataframe(seq):
+    a=pd.DataFrame()
+    a['Ordinal']=convert2pandas(ordinals_np=seq)
+    return a
 
 def sample(nb_of_sequences, Nb_positions, generator,minval=0,maxval=21):
     'if nb_positions is 0 then will '
@@ -75,7 +106,14 @@ def sample(nb_of_sequences, Nb_positions, generator,minval=0,maxval=21):
 
 
 def make_sampling_data(generator, Nb_sequences=1000, Nb_positions=16):
-    # TODO: make two different generators to speed up process, but for now i think this will do ...
+    '''
+
+    :param generator: tensorflow.random.experimental generator v2.0
+    :param Nb_sequences:
+    :param Nb_positions:
+    :return: return ordinals in pandas format
+
+    '''
     'make sampling data and then remove all the blanks'
     seq = sample(nb_of_sequences=Nb_sequences, Nb_positions=Nb_positions, generator=generator)
     for k in np.arange(Nb_positions):
@@ -94,3 +132,7 @@ def _unit_tests_accuracy_blank_removal():
     random_AA = np.array([4, 19])
     random_AA_pos = np.array([4, 12])
     remove_blanks(random_AA=random_AA, random_AA_pos=random_AA_pos, seq=seq, generator=g_parent)
+
+
+
+

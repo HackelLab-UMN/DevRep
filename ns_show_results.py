@@ -10,12 +10,19 @@ import ns_data_modules as dm
 from input_deck import inputs
 import numpy as np
 from input_deck import names,inputs
+fn=names()
 import glob
-def violin_loop_plots(c,loops_2_show=None):
+def violin_loop_plots(c,loops_2_show=None,nb_strings=None):
     if loops_2_show is None:
-        loops_done=dm.read_pickle(c=c,file_description=names.loops_done_fn)
+        loops_done=dm.read_pickle(c=c,file_description=fn.loops_done_fn)
+        loops_2_show=sm.convert2numpy(df=loops_done,field=fn.loops_done_fn)+1
         #of the loops completed only show half of them.
-        loops_2_show=loops_2_show[::2]
+        if nb_strings is None:
+            nb_strings=6
+        step=loops_2_show.shape[0] // nb_strings
+        if step == 0:
+            step=1
+        loops_2_show=loops_2_show[::step]
 
     pm.violin_saved_dataset(c=c,loops_2_show=loops_2_show)
 
@@ -35,6 +42,8 @@ def gif_make(c, file_prefix='heatmap_loop'):
     print('saving ... %s'%dm.make_file_name(c=c,file_description=file_prefix,fileformat='gif'))
 
 def cys_stuff(c):
+    print('starting cystine for job : ')
+    print(c)
     seq_loop=os.listdir(path='./sampling_data/'+dm.make_directory(c=c))
     N=[]
     loops=[]
@@ -43,7 +52,7 @@ def cys_stuff(c):
             df=dm.read_pickle(c=c,file_description=sl[0:-4])
             N.append(sm.convert2numpy(df=df,field='Ordinal'))
             loops.append(sl[15:-4])
-    c_pos = 2
+    c_pos = 1
     c_max=-1
     for n in N:
         max=np.max(np.sum(n==c_pos,axis=1))
@@ -75,7 +84,7 @@ def cys_stuff(c):
         percentage=[]
         nb_seq=[]
         p=[]
-        # TODO: put average yield in here too
+        # TODO: put average yield in here too, plus standard of deviation
         for n_c in np.unique(b,axis=0):
             #calculate the percentage of each
             p.append(np.count_nonzero((b ==n_c).all(axis=1))/n.shape[0]*100)
@@ -125,18 +134,28 @@ def cys_stuff(c):
 
 
 
-C=[inputs(nb_loops=2,
-         nb_steps=3,
-         mutation_type='static',
-         nb_mutations=1,
-         nb_snapshots=2,
-         Nb_sequences=1000)]
-for c in C:
-    violin_loop_plots(c=c,loops_2_show=np.array([1,2]))
-    gif_make(c=c)
-    dm.zip_data(c=c)
-# for i in np.arange(1,3,1):
-#     df=dm.read_pickle(c=c,file_description=dm.make_sequence_filename(loop_nb=i))
-#     pm.make_heat_map(df=df,c=c,loop_nb=i-1)
-# gif_heat_map(c=c)
+
+
+# C=[inputs(nb_loops=50000,
+#          nb_steps=5,
+#          mutation_type='static',
+#          nb_mutations=1,
+#          nb_snapshots=20,
+#          Nb_sequences=1000),
+# inputs(nb_loops=10000,
+#          nb_steps=20,
+#          mutation_type='static',
+#          nb_mutations=1,
+#          nb_snapshots=20,
+#          Nb_sequences=1000)]
+
+def main(C):
+    for c in C:
+        violin_loop_plots(c=c)
+        gif_make(c=c)
+        cys_stuff(c=c)
+        gif_make(c=c,file_prefix=fn.cys_fn)
+        pm.showFieldvsLoops(c=c,field2Show=fn.min_yield_fn)
+        pm.showFieldvsLoops(c=c,field2Show=fn.pp_fn)
+        dm.zip_data(c=c)
 

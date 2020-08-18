@@ -13,10 +13,19 @@ from   input_deck import names
 fn=names()
 
 def violin_saved_dataset(c,loops_2_show,y_lim=None):
+    '''
+
+    :param c: inputs() object
+    :param loops_2_show: Nx1 ndarray array of loops to show in violin plot
+    :param y_lim: 2x1 list . Max and min of y limits
+    :return: makes violin plot of the loops specified in loops2show
+
+
+    '''
     'nb strings is the number of strings in the violin plot'
     # first make the directory and get all the pkl files
     if y_lim is None:
-        y_lim = [-1.5, 2]
+        y_lim = [-1.5, 3]
     df_pp = pd.read_pickle(path=dm.make_file_name(c=c,file_description=fn.pp_fn))
     pp = sm.convert2numpy(df=df_pp, field=fn.pp_fn)
     df_min_yield =pd.read_pickle(path=dm.make_file_name(c=c,file_description=fn.min_yield_fn))
@@ -71,6 +80,13 @@ def violin_saved_dataset(c,loops_2_show,y_lim=None):
 
 
 def make_min_yield_plot(c, min_yield_lst):
+    '''
+
+    :param c: inputs() object
+    :param min_yield_lst: min yield  list
+    :return: makes a min yield plot saves to inputs() directory
+
+    '''
     'this makes the min yield plot'
     plt.plot(np.arange(c.nb_loops + 1).tolist(), min_yield_lst)
     plt.title('min yield vs. nb of loops')
@@ -81,6 +97,13 @@ def make_min_yield_plot(c, min_yield_lst):
     plt.close()
 
 def make_percent_positive_plot(c,percent_pos):
+    '''
+
+    :param c: inputs() object
+    :param percent_pos: percent positive list
+    :return: makes a percent positive plot saves to inputs() directory
+
+    '''
     'makes the percent positive plot '
     pp = []
     for i in np.arange(c.nb_loops):
@@ -111,6 +134,14 @@ def plot_hist(c, i, j, seq,bins=50):
 
 
 def make_heat_map(df,c,loop_nb):
+    '''
+
+    :param df: dataframe with ordinal field
+    :param c: inputs() object
+    :param loop_nb: the loop number in the run
+    :return: makes a heat map saves to inputs() directory
+
+    '''
     ord=sm.convert2numpy(df=df,field='Ordinal')
     nb_AA=21
     nb_positions=16
@@ -182,6 +213,76 @@ def heat_map_plot(frequency,c,loop_nb):
     print('saving heatmap .. '+dm.make_file_name(c=c,file_description='heatmap_loop_%i'% loop_nb,fileformat='png'))
     fig.savefig(dm.make_file_name(c=c,file_description='heatmap_loop_%i'% (loop_nb+1),fileformat='png'))
     plt.close(fig)
+
+
+def showFieldvsLoops(c, field2Show):
+    '''
+
+    :param c: inputs() object
+    :param field2Show: what thing to show ?
+    :return: shows a plot of specified field reading from pickle files in inputs() object
+
+    '''
+
+    df = pd.read_pickle(path=dm.make_file_name(c=c, file_description=field2Show))
+    stat = sm.convert2numpy(df=df, field=field2Show)
+
+    if c.mutation_type == 'dynamic':
+        nm = ''
+    else:
+        nm = ' ,# mutations: %i' % c.nb_mutations
+        plt.plot(np.arange(stat.shape[0]).tolist(), stat, label=c.mutation_type + ' ' + nm, )
+    plt.title('%s vs nested sample loop' % field2Show)
+    plt.ylabel(field2Show)
+    plt.xlabel('loop number')
+    plt.legend()
+    plt.savefig(dm.make_file_name(c=c, file_description='%s_plot'%field2Show, fileformat='png'))
+    plt.close()
+
+
+def twinAxisvsLoops(c,fields2show):
+    '''
+
+
+    :param c: inputs() object
+    :param fields2show: 2x1 List of two fields to show  [default: percent positive and nb mutations]
+    :return: makes twin axis plot of the two fields that are specified
+
+    '''
+
+    df_pp = dm.read_pickle(c=c, file_description=fields2show[0])
+    pp = sm.convert2numpy(df=df_pp, field=fields2show[0])
+
+    # todo: change file descriptions to same thing as field name... make a function
+    #   that just returns the data with one call.
+    df_nb = dm.read_pickle(c=c, file_description=fields2show[1])
+    nb = sm.convert2numpy(df=df_nb, field=fields2show[1])
+
+
+
+    # nb = nb[0:-2].copy()
+    # if nb.shape[0] != pp.shape[0]:
+    #     raise IndexError('number mutations and percent positive lengths are different?')
+
+    loop_range = np.arange(pp.shape[0]).tolist()
+    fig, ax1 = plt.subplots(1, 1, figsize=[5, 3], dpi=300)
+    color = 'tab:red'
+    ax1.set_xlabel('loop nb')
+    ax1.set_ylabel(fields2show[1], color=color)
+    ax1.plot(loop_range, nb, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+    color = 'tab:blue'
+    ax2.set_ylabel(fields2show[0], color=color)  # we already handled the x-label with ax1
+    ax2.plot(loop_range, pp, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.savefig(dm.make_file_name(c=c, file_description='%s_vs_%s_plot'%(fields2show[0],fields2show[1]), fileformat='png'))
+
+
+
 
 
 # unit test for making the heat map... all seemed to go well.

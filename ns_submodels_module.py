@@ -33,6 +33,22 @@ class ns_seq_to_assay_model(mb.seq_to_assay_model):
 
         self.seq_embedding_model = self._model.get_seq_embeding_layer_model()
 
+    def save_predictions(self,df):
+        'save assay score predictions of test dataset to be used with assay-to-yield model'
+        OH_matrix = np.eye(len(self.assays))
+        x_a = self.get_input_seq(df)
+        for z in range(1):  # for each model
+            for i in range(len(self.assays)):  # for each assay
+                cat_var = []
+                for j in x_a:  # for each sequence add cat_var
+                    cat_var.append(OH_matrix[i].tolist())
+                x = load_format_data.mix_with_cat_var(x_a, cat_var)
+                df_prediction = self._model.model.predict(x).squeeze().tolist()
+                df.loc[:, 'Sort' + str(self.assays[i]) + '_mean_score'] = df_prediction
+
+            return df
+
+
     def save_sequence_embeddings(self, df_list=None):
         # each model is already preloaded
         df=df_list.copy()

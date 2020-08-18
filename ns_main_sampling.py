@@ -5,7 +5,7 @@ import os
 import sys
 from input_deck import inputs
 # the input deck : specify these input parameters
-
+import ns_show_results as sr
 
 def driver(c,suppress_output=False):
     check_inputs(c=c)
@@ -46,17 +46,14 @@ def check_inputs(c):
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
 
-c=inputs(nb_loops=2,
-         nb_steps=3,
+c=inputs(nb_loops=100000,
+         nb_steps=5,
          mutation_type='static',
          nb_mutations=1,
          nb_snapshots=2,
          Nb_sequences=1000)
-
 driver(c=c)
-
-
-
+sr.main(C=[c])
 
 
 

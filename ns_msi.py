@@ -48,12 +48,23 @@ def unzip_data(dir_name):
 
 
 
+#push_scripts(['ns_main_sampling.py','ns_show_results.py'])
 
+C=[inputs(nb_loops=50000,
+         nb_steps=5,
+         mutation_type='static',
+         nb_mutations=1,
+         nb_snapshots=20,
+         Nb_sequences=1000),
+inputs(nb_loops=10000,
+         nb_steps=20,
+         mutation_type='static',
+         nb_mutations=1,
+         nb_snapshots=20,
+         Nb_sequences=1000)]
 
-
-c=inputs()
-pull_zipped_data(c=c)
-
+for c in C:
+    pull_zipped_data(c=c)
 
 #TODO: make some file that says what files need to be pulled from msi, but that would be advanced.
 #zip_data(dir_name=sm.make_directory(Nb_steps=5,Nb_loops=3))
