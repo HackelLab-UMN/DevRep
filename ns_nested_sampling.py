@@ -16,6 +16,8 @@ import ns_data_modules as dm
 import ns_submodels_module as ns_mb
 from joblib import wrap_non_picklable_objects
 tf.config.optimizer.set_jit(True)
+from input_deck import names
+fn=names()
 
 
 # @wrap_non_picklable_objects
@@ -134,7 +136,7 @@ class nested_sampling(ABC):
             last_pp = sum(self.percent_pos[-1]) / len(self.percent_pos[-1]) *100
             if last_pp < 20 and self.nb_mutations[-1] > 0:
                 self.nb_mutations.append(self.nb_mutations[-1] - 1)
-            elif (last_pp > 20 and last_pp < 30) or self.nb_mutations[-1]>16: # shouldn't have more than 16 unique mutations
+            elif (last_pp > 20 and last_pp < 30) or self.nb_mutations[-1]>=16: # shouldn't have more than 16 unique mutations
                 self.nb_mutations.append(self.nb_mutations[-1])
             else:
                 self.nb_mutations.append(self.nb_mutations[-1] + 1)
@@ -239,9 +241,9 @@ class ns_random_sample(nested_sampling):
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
         # note: things may change between tensorflow versions
         self.g = tf.random.experimental.Generator.from_seed(seed)
+        self.rng = np.random.default_rng()
         #self.nb_mutations=nb_mutations
-
-
+       # self.rng_times=pd.DataFrame()
     def walk(self, min_yield,j, steps_2_show, loops_2_show,c):
         'this is a random walk that makes one mutation at a time'
 
@@ -255,8 +257,7 @@ class ns_random_sample(nested_sampling):
             print('loop %i of %i, step %i of %i' % (j + 1, c.nb_loops, i + 1, c.nb_steps))
             self.start_timer()
             print('making %i mutations'%self.nb_mutations[-1])
-            for k in np.arange(self.nb_mutations[-1]):
-                self.mutate()
+            self.multiple_mutate(nb_mutations=self.nb_mutations[-1],j=j,i=i)
             self.test_seq = self.test_seq[['Ordinal']]
             print('getting yield')
             self.get_yield()
@@ -266,13 +267,38 @@ class ns_random_sample(nested_sampling):
             self.stop_timer(j=j, i=i, loops_2_show=loops_2_show)
         self.percent_pos.append(percent_pos)
 
-    def mutate(self):
+    def multiple_mutate(self,nb_mutations,j,i):
+        '''
+
+        :param nb_mutations: number of mutations to make
+        :return: calls to self.mutate will cause changes to 'Ordinal' column of self.test_seq
+
+        '''
+       # start=time.time()
+        S=np.tile(np.arange(16),(self.nb_of_sequences,1))
+
+        for s in S:
+            self.rng.shuffle(s)
+            # if np.unique(s).shape[0] != 16:
+            #     raise SyntaxError
+
+        S=S[:,0:nb_mutations].copy()
+
+        for random_AA_pos in S.T:
+            self.mutate(random_AA_pos=random_AA_pos.copy())
+
+       # total=time.time()-start
+
+       # self.rng_times.loc[i,'%i loop'%(j+1)]=total
+
+    def mutate(self,random_AA_pos=None):
         'mutate the sequences where necessary, this is a random mutation'
         # mutate every sequence of the original
         # for a mutation to occur ;
         # pseudo random number
         # generate a pseudo random number to define which AA to change [0-15]
-        random_AA_pos = self.g.uniform(shape=[self.nb_of_sequences], minval=0, maxval=16,
+        if random_AA_pos is None:
+            random_AA_pos = self.g.uniform(shape=[self.nb_of_sequences], minval=0, maxval=16,
                                        dtype=tf.int64).numpy()  # [0,16)
         # generate a pseudo random number to define which AA to change to [0-20]
         # using the same generator might be problematic

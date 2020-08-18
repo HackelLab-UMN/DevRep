@@ -32,7 +32,6 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-
 def check_inputs(c):
     if c.nb_loops<0 or c.nb_steps<0:
         raise AttributeError('Number of loops or number of steps is less than zero')
@@ -45,14 +44,19 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-
-c=inputs(nb_loops=100000,
+c=inputs(nb_loops=10000,
          nb_steps=5,
-         mutation_type='static',
-         nb_mutations=1,
-         nb_snapshots=2,
+         mutation_type='dynamic',
+         nb_mutations=10,
+         nb_snapshots=25,
          Nb_sequences=1000)
-driver(c=c)
+
+if sys.platform=='darwin':
+    suppress_output = False
+else:
+    suppress_output=True
+
+driver(c=c,suppress_output=suppress_output)
 sr.main(C=[c])
 
 

@@ -47,3 +47,4 @@ class names():
         self.loops_done_fn='loops_done'
         self.times_fn='times'
         self.cys_fn='cys_loop'
+        self.random_fn='random_times'

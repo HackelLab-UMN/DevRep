@@ -32,7 +32,7 @@ def take_snapshot(self,c,loop_nb,loops_done):
     to_pickle(c=c,data=loops_done,data_name= n.loops_done_fn)
     to_pickle(c=c,data=self.nb_mutations,data_name=n.nb_mutation_fn)
     to_pickle(c=c, data=self.min_yield,data_name=n.min_yield_fn)
-
+   # self.rng_times.to_pickle(path=make_file_name(c=c,file_description=n.random_fn))
     pp = []
     for i in np.arange(loop_nb):
         pp.append(sum(self.percent_pos[i]) / len(self.percent_pos[i]))

@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#PBS -l walltime=24:00:00,nodes=1:ppn=8,mem=20gb
+#PBS -l walltime=36:00:00,nodes=1:ppn=8,mem=20gb
 #PBS -m abe
 #PBS -M joh14192@umn.edu
 
@@ -8,6 +8,5 @@ source activate awg
 
 cd ./DevRep
 python3 ns_main_sampling.py $PBS_ARRAYID
-python3 ns_show_results.py $PBS_ARRAYID
 
 
