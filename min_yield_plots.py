@@ -12,7 +12,7 @@ n=names()
 
 
 
-def min_yield(C,field2Show):
+def comparisons(C,field2Show):
     '''
 
     :param C: list of runs

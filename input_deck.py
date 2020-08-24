@@ -15,7 +15,6 @@ class inputs():
         :param nb_snapshots: how often to save the data.
         :param Nb_sequences: Number of sequences in a run
 
-
         '''
 
         #just make all the rest of the parameters besides nb_sequences
@@ -38,7 +37,7 @@ class inputs():
 class names():
     def __init__(self):
         '''
-        this class specifies the file and field names for all the saved parameters
+        this class specifies the file and field names in Dataframes() for all the saved parameters
         '''
         self.nb_mutation_fn='nb_mutations'
         self.pp_fn='percent_pos_average'

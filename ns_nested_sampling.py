@@ -24,7 +24,6 @@ fn=names()
 class nested_sampling(ABC):
     # main method is to call is walk()
     def __init__(self, s2a_params=None, e2y_params=None, Nb_sequences=1000,Nb_positions=16,nb_models=1):
-        # TODO: check times for different number of sequences
         'nested sampling initilization for number of sequences and number of positions of ordinals'
         # initilize default model parameters
         if e2y_params is None:
@@ -60,11 +59,9 @@ class nested_sampling(ABC):
         self.min_yield = []
         # parent random number generator
         self.percent_pos = []
-        self.vp_step = []
         self.dir_name=[]
         self.nb_mutations=[]
         self.mutation_type=[]
-        # TODO: make a run stats file save it to the directory
         self.run_stats=pd.DataFrame({'e2y'})
 
     def nested_sample(self, c, loops_2_show=None):
@@ -78,28 +75,14 @@ class nested_sampling(ABC):
         :return: the run times for the loops in loops to show as a pandas Dataframe
         '''
         'main method to call, does nested sampling'
-        # TODO: describe what the inputs should be ...
-        # this is the loop I would like to have done by the end of today. So that a driver script can just call this
-        # method an all will be good.
-        # write2pickle is a boolean flag to see where optimized sequences should be written too.
-        # TODO: make sure to add nproc to this as well? maybe?
         self.nb_mutations.append(c.nb_mutations)
         self.mutation_type.append(c.mutation_type)
 
         self.dir_name= dm.make_directory(c=c)
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
 
-
-        if loops_2_show is None:
-            # default is to show 3 loops
-            loops_2_show = np.array([0, c.nb_loops // 2, c.nb_loops-1])
-            loops_2_show =np.unique(loops_2_show).copy()
-
-
         dm.save_run_stats(c=c,loops_2_show=loops_2_show)
 
-        # TODO: figure out the orginal_seq and test_seq craziness... honestly test sequence
-        #  should just be a local parameter to the walk. not a local to the class one... that would look much better ..
         loops_done=[]
         for j in np.arange(c.nb_loops):
             print('LOOP %i of %i loops' % (j, c.nb_loops))
@@ -117,16 +100,15 @@ class nested_sampling(ABC):
             if j in loops_2_show:
                 loops_done.append(j)
                 dm.take_snapshot(self=self,loop_nb=j,c=c,loops_done=loops_done)
+                pm.make_heat_map(df=self.original_seq, c=c, loop_nb=j)
+                #todo: add making the UMAP here pm.make_UMAP
                 dm.zip_data(c=c)
-                pm.make_heat_map(df=self.original_seq,c=c, loop_nb=j)
 
 
 
         # TODO: plot the rate of change of min yield as well ...
         pm.make_min_yield_plot(min_yield_lst=self.min_yield,c=c)
         pm.make_percent_positive_plot(c=c,percent_pos=self.percent_pos)
-
-        self.times.to_pickle(path=dm.make_file_name(c=c,file_description='times',fileformat='pkl'))
 
         return self.times
 
@@ -143,7 +125,7 @@ class nested_sampling(ABC):
         elif self.mutation_type[-1] is 'dynamic':
             # find current percent positive and percent positive before that.
             last_pp = sum(self.percent_pos[-1]) / len(self.percent_pos[-1]) *100
-            if last_pp < 20 and self.nb_mutations[-1] > 0:
+            if last_pp < 20 and self.nb_mutations[-1] > 1: # bug here this was zero before... dont make that mistake again...
                 self.nb_mutations.append(self.nb_mutations[-1] - 1)
             elif (last_pp > 20 and last_pp < 30) or self.nb_mutations[-1]>=16: # shouldn't have more than 16 unique mutations
                 self.nb_mutations.append(self.nb_mutations[-1])
@@ -291,7 +273,7 @@ class ns_random_sample(nested_sampling):
         # N is the number of iterations , can update in the future to do an actual convergence algorithm
         # i and j represent the histogram to plot too. default is just a single walk.
         #TODO: easy parallelization using joblib library
-        #TODO: make self.test_seq a local parameter...
+        #TODO: make self.test_seq a local parameter... maybe idk yet
         percent_pos = []
         for i in np.arange(c.nb_steps):
             print('loop %i of %i, step %i of %i' % (j + 1, c.nb_loops, i + 1, c.nb_steps))
@@ -309,7 +291,7 @@ class ns_random_sample(nested_sampling):
 
     def multiple_mutate(self,nb_mutations,j,i):
         '''
-
+        the function for making multiple mutations, will just make continual calls to mutate
         :param nb_mutations: number of mutations to make
         :return: repetetive calls to self.mutate will cause changes to 'Ordinal' column of self.test_seq
 
@@ -363,7 +345,22 @@ class ns_random_sample(nested_sampling):
 
         self.test_seq['Ordinal'] = test_list_seq
 
-
-
-#TODO: smart sample which uses a combination of both
+    def __reduce__(self):
+        '''
+        this function is used during serialization for parrelization
+        https://docs.python.org/3/library/pickle.html
+        :return: a tuple consisting of the class object and a nested tuple of the inputs to reconstruct the class
+        '''
+        return (self.__class__,(self.nb_of_sequences,self.nb_models))
 #TODO: write a bash script that opens an interactive job immedeatily after running
+# todo: continue adding comments to code
+
+class ns_percent_positve(ns_random_sample):
+
+    # todo : have the update number of mutations be different
+    def __init__(self,Nb_sequences,nb_models ):
+        super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
+    def update_nb_mutations(self):
+        
+        print('hello')
+

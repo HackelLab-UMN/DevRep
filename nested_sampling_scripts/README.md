@@ -43,8 +43,11 @@ University of Minnesota -Twin Cities - CEML - Martiniani Lab
 Version 0.3 - **not stable** - 7/27/2020 
 
 
-##Notes
+# Notes
 
 -Must init a new e2y model for every model that one has. This doesn't have to be between steps. 
-Just for a model. 
+Just for a model.
+
+
+update this .... this is way out of date. 
 

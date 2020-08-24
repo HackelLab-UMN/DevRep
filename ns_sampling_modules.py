@@ -51,8 +51,6 @@ def remove_blanks(random_AA_pos, random_AA, seq, generator):
     change_blanks = incorrect_blanks(random_AA=random_AA, random_AA_pos=random_AA_pos, seq=seq)
     size=[-1]
     while change_blanks.any():
-        #TODO: to deal with if your going to change position 5 and its 19 and 4 is 19 , 5 must be
-        # resampled to 19...
         size.append(np.count_nonzero(change_blanks))
         print('change these blanks %i' % size[-1])
         random_AA[change_blanks] = sample(nb_of_sequences= size[-1],Nb_positions= 0, generator=generator)
@@ -76,7 +74,7 @@ def convert2numpy(df, field='Ordinal'):
     '''
     :param df: pandas dataframe
     :param field: column to transmit to numpy array
-    :return: returns numpuy array
+    :return: returns numpy array
     '''
     return np.copy(np.array(df[field].to_numpy().tolist()))
 def splitPandas(df,nb_splits=10):

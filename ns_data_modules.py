@@ -26,6 +26,7 @@ def make_sequence_filename(loop_nb):
 
 def take_snapshot(self,c,loop_nb,loops_done):
     # make the dataframe
+    #todo: init a class that allows for different saving of data depending on run.
     n=names()
     self.original_seq.to_pickle(path=make_file_name(c=c, file_description=make_sequence_filename(loop_nb=loop_nb+1)))
     self.times.to_pickle(path=make_file_name(c,file_description=n.times_fn))

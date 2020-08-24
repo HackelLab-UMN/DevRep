@@ -14,6 +14,13 @@ fn=names()
 import glob
 
 def violin_loop_plots(c,loops_2_show=None,nb_strings=None):
+    '''
+    make violin plots of distribution of yield for sequences
+    :param c: inputs() object
+    :param loops_2_show: ndarray of loops that were saved in run specified by 'c'
+    :param nb_strings: number of strings to have in the violin plot  [default: 6]
+    :return: saves the violin plot
+    '''
     if loops_2_show is None:
         loops_done=dm.read_pickle(c=c,file_description=fn.loops_done_fn)
         loops_2_show=sm.convert2numpy(df=loops_done,field=fn.loops_done_fn)+1
@@ -28,6 +35,16 @@ def violin_loop_plots(c,loops_2_show=None,nb_strings=None):
     pm.violin_saved_dataset(c=c,loops_2_show=loops_2_show)
 
 def gif_make(c, file_prefix='heatmap_loop'):
+    #todo:add a progress bar to gifs so its easier on the eyes
+    '''
+    makes a gif out of png files
+    :param c: inputs() object
+    :param file_prefix: prefix the the png files to make a gif out of
+    note: don't include the second underscore '_'
+    :return: a gif with the same file name as file_prefix
+    '''
+    print('making gif for %s'%file_prefix)
+    print(c)
     heat_maps=glob.glob(dm.make_file_name(c=c,file_description=file_prefix+'*',fileformat='png'))
     heat_maps=sorted(heat_maps,key=lambda x: int(x[len(dm.make_file_name(c=c,file_description=file_prefix,fileformat='')):-4]))
     im=[]
@@ -43,6 +60,15 @@ def gif_make(c, file_prefix='heatmap_loop'):
     print('saving ... %s'%dm.make_file_name(c=c,file_description=file_prefix,fileformat='gif'))
 
 def cys_stuff(c):
+
+    '''
+
+    :param c: inputs() object
+    :return: returns png files of already saved loops and their corresponding cystene properties.
+    Note this function can be tweaked in order observe any of the Amino Acids. Just need to add
+    a parameter c_position.
+
+    '''
     print('starting cystine for job : ')
     print(c)
     seq_loop=os.listdir(path='./sampling_data/'+dm.make_directory(c=c))
@@ -133,24 +159,12 @@ def cys_stuff(c):
         fig.savefig(dm.make_file_name(c=c, file_description='cys_loop_%s' % loop, fileformat='png'))
         plt.close(fig)
 
-
-
-
-
-# C=[inputs(nb_loops=50000,
-#          nb_steps=5,
-#          mutation_type='static',
-#          nb_mutations=1,
-#          nb_snapshots=20,
-#          Nb_sequences=1000),
-# inputs(nb_loops=10000,
-#          nb_steps=20,
-#          mutation_type='static',
-#          nb_mutations=1,
-#          nb_snapshots=20,
-#          Nb_sequences=1000)]
-
 def main(C):
+    '''
+    main function to run for ns_show_results
+    :param C: a list of inputs() objects
+    :return:
+    '''
     for c in C:
         violin_loop_plots(c=c)
         gif_make(c=c)
@@ -158,5 +172,8 @@ def main(C):
         gif_make(c=c,file_prefix=fn.cys_fn)
         pm.showFieldvsLoops(c=c,field2Show=fn.min_yield_fn)
         pm.showFieldvsLoops(c=c,field2Show=fn.pp_fn)
+        pm.twinAxisvsLoops(c=c,fields2show=[fn.pp_fn,fn.nb_mutation_fn])
         dm.zip_data(c=c)
 
+from ns_latest_runs import C
+main(C)

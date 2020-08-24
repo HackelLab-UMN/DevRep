@@ -231,7 +231,7 @@ def showFieldvsLoops(c, field2Show):
         nm = ''
     else:
         nm = ' ,# mutations: %i' % c.nb_mutations
-        plt.plot(np.arange(stat.shape[0]).tolist(), stat, label=c.mutation_type + ' ' + nm, )
+    plt.plot(np.arange(stat.shape[0]).tolist(), stat, label=c.mutation_type + ' ' + nm, )
     plt.title('%s vs nested sample loop' % field2Show)
     plt.ylabel(field2Show)
     plt.xlabel('loop number')
@@ -253,8 +253,6 @@ def twinAxisvsLoops(c,fields2show):
     df_pp = dm.read_pickle(c=c, file_description=fields2show[0])
     pp = sm.convert2numpy(df=df_pp, field=fields2show[0])
 
-    # todo: change file descriptions to same thing as field name... make a function
-    #   that just returns the data with one call.
     df_nb = dm.read_pickle(c=c, file_description=fields2show[1])
     nb = sm.convert2numpy(df=df_nb, field=fields2show[1])
 
@@ -269,7 +267,7 @@ def twinAxisvsLoops(c,fields2show):
     color = 'tab:red'
     ax1.set_xlabel('loop nb')
     ax1.set_ylabel(fields2show[1], color=color)
-    ax1.plot(loop_range, nb, color=color)
+    ax1.plot(loop_range, nb[0:-2], color=color)
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()
@@ -280,7 +278,36 @@ def twinAxisvsLoops(c,fields2show):
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     plt.savefig(dm.make_file_name(c=c, file_description='%s_vs_%s_plot'%(fields2show[0],fields2show[1]), fileformat='png'))
+    plt.close(fig)
+def compare(C,field2Show):
+    '''
+    compare fields across runs
+    make sure c.Nb_sequences and c.nb_loops is the same for all runs.
+    :param C: list of runs
+    :param field2Show: what thing to show ?
+    :return: None
+    '''
 
+
+    for c in C:
+        if C[0].Nb_sequences!=c.Nb_sequences or C[0].nb_loops !=c.nb_loops:
+            raise SystemError('Your sequences and loops are not the same for comparing models.')
+        df=pd.read_pickle(path=dm.make_file_name(c=c,file_description=field2Show))
+        stat=sm.convert2numpy(df=df,field=field2Show)
+
+        if c.mutation_type=='dynamic':
+            nm=''
+        else :
+            nm=' ,# mutations: %i'%c.nb_mutations
+        plt.plot(np.arange(stat.shape[0]).tolist(),stat,label=c.mutation_type+' '+nm,)
+    plt.title('%s vs nested sample loop :%i'%(field2Show,C[0].Nb_sequences))
+    plt.ylabel(field2Show)
+    plt.xlabel('loop number')
+    plt.legend()
+    os.system('mkdir ./sampling_data/comparisons')
+    print('saving ./sampling_data/comparisons/%s_nb_loops_%i_nb_sequences_%i'% (field2Show,C[0].nb_loops,C[0].Nb_sequences))
+    plt.savefig('./sampling_data/comparisons/%s_nb_loops_%i_nb_sequences_%i'% (field2Show,C[0].nb_loops,C[0].Nb_sequences))
+    plt.close()
 
 
 

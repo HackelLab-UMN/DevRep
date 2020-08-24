@@ -12,11 +12,9 @@ def driver(c,suppress_output=False):
     trial1 = ns.ns_random_sample(Nb_sequences=c.Nb_sequences)
     step = c.nb_loops // c.nb_snapshots
     loops_2_show=np.arange(0,c.nb_loops+step,step)
-    loops_2_show[-1]=loops_2_show[-1]-1
+    loops_2_show[-1]=c.nb_loops-1
     if suppress_output is True:
         with suppress_stdout():
-            # TODO :  is to remove this and just have the class input, it would be so much cleaner
-            #   that way
             trial1.nested_sample(c=c,loops_2_show=loops_2_show)
     else:
         times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)

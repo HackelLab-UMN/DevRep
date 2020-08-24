@@ -21,16 +21,3 @@ for file in zip_files:
 
 # now much save the learned_embedding_*.pkl files for the best model.
 # todo:  this is incorrect ... neeed to run main_DevRep_example.py
-# set pandas df of sequences to be predicted, must contain a "Ordinal" column of paratope
-# the file should be saved under /datasets/
-df=['seq_to_assay_train_1,8,10'] #this is just an example
-
-#import sequence_to_assay model (red box)
-#currently use a embedding_fnn_linear model to predict assays 1,8,10.
-#will probabaly change when I find the most accurate model
-s2a_params=[[1,8,10],'emb_cnn',1]
-s2a=mb.seq_to_assay_model(*s2a_params)
-
-#now save the sequence embeddings, file is under /datasets/predicted/learned_embedding_[model properties], col='learned_embedding'
-#saves 3 different embeddings from 3 different models
-s2a.save_sequence_embeddings(df)
