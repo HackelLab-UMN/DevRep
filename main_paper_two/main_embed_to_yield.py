@@ -134,5 +134,3 @@ ax.set_title('Yield Predictions',fontsize=6)
 fig.tight_layout()
 fig.savefig('./embed_to_yield_strategies.png')
 plt.close()
-
-

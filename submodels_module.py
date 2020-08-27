@@ -424,7 +424,7 @@ class seq_to_pred_yield_model(x_to_yield_model,seq_to_x_model):
     ## The x_to_yield_model is instantiated with the first two elements of seq_to_pred_yield_prop list, while the seq_to_x_model is instantiated with
     ## the first element of the seq_to_pred_yield_prop list. An assay_str class variable is built from the elements of the pred_yield_model_prop's first element
     ## The model name is updatated using the model function update_model_name() and the training_df class variable is updated to access data from
-    ## seq_to_assay_train_1,8,10_seq_and_assay_yield_forest_1_0.pkl in the predicted directory. FInally the number of cross validation splits and repeats
+    ## seq_to_assay_train_1,8,10_seq_and_assay_yield_forest_1_0.pkl in the predicted directory. Finally the number of cross validation splits and repeats
     ## along with the number of test repeats and hyperparameter trials are also updated. 
     'sequence to yield model using predicted yields from assay scores'
     def __init__(self, pred_yield_model_prop, seq_to_pred_yield_prop):
