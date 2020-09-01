@@ -271,7 +271,8 @@ class x_to_assay_model(model):
 class assay_to_yield_model(x_to_yield_model, assay_to_x_model):
     'assay to yield, provide which assays, limit test set to useable subset'
     ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str, then the x_to_yield_model
+    ## The array represents the various arrays used to build the model, the string is regression model to be used to build the model and the
+    ## float is the sample fraction. This is in turn used construct a class variable assay_str, then the x_to_yield_model
     ## object is instantiated followed by the assay_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, assays, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
@@ -281,7 +282,8 @@ class assay_to_yield_model(x_to_yield_model, assay_to_x_model):
 class weighted_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
     'weight training data by average(log2(trials))'
     ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str another boolean weightbycounts and the function 
+    ## The array represents the various arrays used to build the model, the string is regression model to be used to build the model and the
+    ## float is the sample fraction. This is in turn used construct a class variable assay_str another boolean weightbycounts and the function 
     ## weightbycountsfxn is linked to the weightbycounts() function in load_format_data, then the x_to_yield_model
     ## object is instantiated followed by the assay_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, assays, model_architecture, sample_fraction):
@@ -293,9 +295,10 @@ class weighted_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
 
 class twogate_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
     'assay to yield, provide which assays and stringency, limit test set to useable subset'
-    ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str and two class dataframes called training_df
-    ## and testing_df, then the x_to_yield_model object is instantiated followed by the assay_to_x_model thereby inheriting its respective class variables and funtions
+    ## To instantiate this class object an array, two strings and a float between 0 and 1 are required.The list is the assays to be used to build
+    ## the regression model and the float is the sample fraction. One string is the model architectur and
+    ## the other is used construct a class variable assay_str and two class dataframes called training_df and testing_df
+    ## and its respective class variables and funtions, then the x_to_yield_model object is instantiated followed by the assay_to_x_model thereby inheriting 
     def __init__(self, assays, stringency, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('twogate'+stringency+'_assays'+self.assay_str, model_architecture, sample_fraction)
@@ -306,7 +309,8 @@ class twogate_assay_to_yield_model(x_to_yield_model, assay_to_x_model):
 class assay_count_to_yield_model(x_to_yield_model):
     'assay to yield including the number of observations in the input'
     ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str then the get_input_seq is linked to the get_assays_and_counts 
+    ## The array represents the various arrays used to build the model, the string is regression model to be used to build the model and the
+    ## float is the sample fraction.This is in turn used construct a class variable assay_str then the get_input_seq is linked to the get_assays_and_counts 
     ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
     def __init__(self, assays, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
@@ -315,9 +319,10 @@ class assay_count_to_yield_model(x_to_yield_model):
 
 class stassay_to_yield_model(x_to_yield_model):
     'assay to yield, provide which assays and which trial '
-    ## To instantiate this class object two arrays, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str then the get_input_seq is linked to the get_stassays 
-    ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
+    ## To instantiate this class objecta arrays, two strings and a float between 0 and 1 are required.
+    ## The array represents the various arrays used to build the model, one string is regression model to be used to build the model and the
+    ## float is the sample fraction, the other string represents the trials type to be considered.This is in turn used construct a class variable assay_str 
+    ## then the get_input_seq is linked to the get_stassays function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
     def __init__(self, assays, trial, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('st'+str(trial)+'_assays'+self.assay_str, model_architecture, sample_fraction)
@@ -325,8 +330,10 @@ class stassay_to_yield_model(x_to_yield_model):
 
 class ttassay_to_yield_model(x_to_yield_model):
     ## To instantiate this class object two arrays, a string and a float between 0 and 1 are required.
-    ## This is in turn used construct a class variable assay_str then the get_input_seq is linked to the get_ttassays 
-    ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
+    ## One array represents the assays to be used to build the model, another array is the different types of trials to be considered
+    ## the string is the regression model while the float is the sample fraction to be used. This is in turn used construct a class variable assay_str
+    ## then the get_input_seq is linked to the get_ttassays function in the load_format_data script, then the x_to_yield_model object is instantiated,
+    ## thereby inheriting its class variables.
     'assay to yield, provide which assays and which 2 trials'
     def __init__(self, assays, trials, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
@@ -335,15 +342,15 @@ class ttassay_to_yield_model(x_to_yield_model):
 
 class seq_to_yield_model(x_to_yield_model, seq_to_x_model):
     'seq to yield'
-    ## To instantiate this class object, a string and a float between 0 and 1 are required. First the x_to_yield_model
-    ##  object is instantiated followed by the seq_to_x_model thereby inheriting its respective class variables and funtions
+    ## To instantiate this class object, a string and a float between 0 and 1 are required which represent the regression model and sample fraction 
+    ##  respectively. First the x_to_yield_model object is instantiated followed by the seq_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, model_architecture, sample_fraction):
         super().__init__('seq', model_architecture, sample_fraction)
         seq_to_x_model.__init__(self,model_architecture)
 
 class seqandassay_to_yield_model(x_to_yield_model):
     'combine sequence and assay scores for model input'
-    ## To instantiate this class object an arrays, a string and a float between 0 and 1 are required.
+    ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
     ## This is in turn used to construct a class variable assay_str then the get_input_seq is linked to the get_seq_and_assays() 
     ## function in the load_format_data script, then the x_to_yield_model object is instantiated,thereby inheriting its class variables.
     def __init__(self,assays,model_architecture,sample_fraction):
@@ -367,7 +374,8 @@ class seqandtwogateassay_to_yield_model(x_to_yield_model):
 
 class seqandweightedassay_to_yield_model(x_to_yield_model):
     'sequence and assay input, training weighted by observations'
-    ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
+    ## To instantiate this class object an array, a string and a float between 0 and 1 are required. The array represents the various
+    ## arrays used to build the model, the string is regression model to be used to build the model and the float is the sample fraction.
     ## This is in turn used to construct a class variable assay_str then the get_input_seq is linked to the get_seq_and_assays() 
     ## function, similarly a class boolean weightbycounts is marked true and the function weightbycountsfxn is linked to the 
     ## weightbycounts() functions in the lod_format_data.py script
@@ -381,9 +389,10 @@ class seqandweightedassay_to_yield_model(x_to_yield_model):
 
 class seqandstassay_to_yield_model(x_to_yield_model):
     'seq and assay to yield, provide which assays and which trial '
-    ## To instantiate this class object two arrays, a string and a float between 0 and 1 are required.
-    ## This is in turn used to construct a class variable assay_str then the get_input_seq is linked to the get_seq_and_stassays() 
-    ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
+    ## To instantiate this class object one array, two string and a float between 0 and 1 are required. The array represents the various
+    ## arrays used to build the model, one string is regression model to be used to build the model and the float is the sample fraction.
+    ## The other string is the type of trial to be considered. This is in turn used to construct a class variable assay_str then the get_input_seq
+    ## is linked to the get_seq_and_stassays() function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
     def __init__(self, assays, trial, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('seq_and_st'+str(trial)+'_assays'+self.assay_str, model_architecture, sample_fraction)
@@ -391,9 +400,10 @@ class seqandstassay_to_yield_model(x_to_yield_model):
 
 class seqandttassay_to_yield_model(x_to_yield_model):
     'seq and assay to yield, provide which assays and which trials to average '
-    ## To instantiate this class object two arrays, a string and a float between 0 and 1 are required.
-    ## This is in turn used to construct a class variable assay_str then the get_input_seq is linked to the get_seq_and_ttassays() 
-    ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
+    ## To instantiate this class object two arrays, a string and a float between 0 and 1 are required. One array represents the various arrays
+    ## used to build this model, the other array is the different types of trials to be considered, the string is the regression model used to build
+    ## the model and finally the float is the sample fraction This is in turn used to construct a class variable assay_str then the get_input_seq is 
+    ## linked to the get_seq_and_ttassays() function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
     def __init__(self, assays, trials, model_architecture, sample_fraction):
         self.assay_str=','.join([str(x) for x in assays])
         super().__init__('seq_and_tt'+str(trials[0])+','+str(trials[1])+'_assays'+self.assay_str, model_architecture, sample_fraction)
@@ -401,7 +411,8 @@ class seqandttassay_to_yield_model(x_to_yield_model):
 
 class seqandassay_count_to_yield_model(x_to_yield_model):
     'seq and assay (including counts) to yield'
-    ## To instantiate this class object an array, a string and a float between 0 and 1 are required.
+    ## To instantiate this class object an array, a string and a float between 0 and 1 are required.The array represents the various
+    ## arrays used to build the model, the string is regression model to be used to build the model and the float is the sample fraction.
     ## This is in turn used to construct a class variable assay_str then the get_input_seq is linked to the get_seq_and_assays_and_counts() 
     ## function in the load_format_data script, then the x_to_yield_model object is instantiated, thereby inheriting its class variables.
     def __init__(self,assays,model_architecture,sample_fraction):
@@ -411,8 +422,9 @@ class seqandassay_count_to_yield_model(x_to_yield_model):
 
 class final_seq_to_yield_model(seq_to_yield_model):
     ## This object inherits from the seq_to_yield_model() class (LIST_B). To instantiate this class object a string and a float between 0 and 1 are required
-    ## Then the seq_to_yield_model class object is instantiated with the model_architecture and sample_fraction input, thereby inheriting its class variables
-    ## Then the switch_train_test() function is run to edit the training and testing data.
+    ## The string is the regression model used to build the model while the float is the sample fraction. Then the seq_to_yield_model class object is 
+    ## instantiated with the model_architecture and sample_fraction input, thereby inheriting its class variables. Then the switch_train_test() function
+    ##  is run to edit the training and testing data.
     'redoes training and testing divison for final comparison'
     def __init__(self,model_architecture,sample_fraction):
         super().__init__(model_architecture,sample_fraction)
@@ -444,31 +456,35 @@ class seq_to_pred_yield_model(x_to_yield_model,seq_to_x_model):
 
 class seq_to_assay_model(x_to_assay_model, seq_to_x_model):
     'seq to assay, provide assays'
-    ## To instantiate this class object,a list, a string and a float between 0 and 1 are required. First the x_to_assay_model
-    ##  object is instantiated followed by the seq_to_x_model thereby inheriting its respective class variables and funtions
+    ## To instantiate this class object,a list, a string and a float between 0 and 1 are required. The array represents the various
+    ## arrays used to build the model, the string is regression model to be used to build the model and the float is the sample fraction.
+    ## First the x_to_assay_model object is instantiated followed by the seq_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, assays, model_architecture, sample_fraction):
         super().__init__('seq',assays, model_architecture, sample_fraction)
         seq_to_x_model.__init__(self,model_architecture)
 
 class control_to_assay_model(x_to_assay_model, control_to_x_model):
     'predict assay scores based upon average of assay score of training set'
-    ## To instantiate this class object,a list, a string and a float between 0 and 1 are required. First the x_to_assay_model
-    ##  object is instantiated followed by the control_to_x_model thereby inheriting its respective class variables and funtions
+    ## To instantiate this class object,a list, a string and a float between 0 and 1 are required. The array represents the various
+    ## arrays used to build the model, the string is regression model to be used to build the model and the float is the sample fraction.
+    ## First the x_to_assay_model object is instantiated followed by the control_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, assays, model_architecture, sample_fraction):
         super().__init__('control',assays, model_architecture, sample_fraction)
         control_to_x_model.__init__(self)
 
 class control_to_yield_model(x_to_yield_model, control_to_x_model):
     'predict assay scores based upon average of assay score of training set'
-    ## To instantiate this class object,a list, a string and a float between 0 and 1 are required. First the x_to_yiel_model
-    ##  object is instantiated followed by the control_to_x_model thereby inheriting its respective class variables and funtions
+    ## To instantiate this class object, a string and a float between 0 and 1 are required. The string is regression model to be used
+    ## to build the model and the float is the sample fraction.First the x_to_yiel_model object is instantiated followed by the
+    ##  control_to_x_model thereby inheriting its respective class variables and funtions
     def __init__(self, model_architecture, sample_fraction):
         super().__init__('control', model_architecture, sample_fraction)
         control_to_x_model.__init__(self)
 
 class sequence_embeding_to_yield_model(x_to_yield_model, sequence_embedding_to_x_model):
     'predict yield from sequence embedding trained by a seq-to-assay model'
-    ## To instantiate this class object, an array, a string and a flot between 0 and 1 are required. Initally a class variable assay_str
+    ## To instantiate this class object, an array, a string and a flot between 0 and 1 are required. The string is the regression model
+    ## used to build the model, while the float is the sample fraction of the data. Initally a class variable assay_str
     ## is constructed using the seq_to_assay_model_prop list. Then a temporary string is created by using the 2nd,3rd,4th elements of
     ## the seq_to_assay_model_prop list. Following this the x_to_yield_model and sequence_embedding_to_x_model are instantiated thereby
     ## inheriting the respective class variables and functions. Following this the class variable for the number of test repeats and
@@ -484,9 +500,10 @@ class sequence_embeding_to_yield_model(x_to_yield_model, sequence_embedding_to_x
 
 class final_sequence_embeding_to_yield_model(sequence_embeding_to_yield_model):
     'look at class name, but done with better train/test split'
-     ## This yields from the above mentioned class sequence_embedding_to_yield_model() (LIST_A object). To instantiate
+     ## This inherits from the above mentioned class sequence_embedding_to_yield_model() (LIST_A object). To instantiate
      ## this object a list, a string and a float between 0 and 1 is required, these inputs are then passed into the sequence_embeddding_to_yield_model
-     ## instantiator to inherit its variables and functions. Following this the model name is updated and the trainig and testing data set is switched.
+     ## instantiator to inherit its variables and functions.The string is the regression model used to build the model, while the float is the sample
+     ## fraction of the data. Following this the model name is updated and the trainig and testing data set is switched.
     def __init__(self, seq_to_assay_model_prop, model_architecture, sample_fraction):
         super().__init__(seq_to_assay_model_prop, model_architecture, sample_fraction)
         self.update_model_name('final'+self.model_name)
