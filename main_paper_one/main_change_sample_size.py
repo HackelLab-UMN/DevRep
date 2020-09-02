@@ -166,7 +166,7 @@ ontrol_model.limit_test_set([1,8,10])
 ## Then using the limit_test_set() function of the x_to_yield_model parent class the testing_df class dataframe is changed to reflect the 1,8,10 assay scores
 exploded_df,_,_=load_format_data.explode_yield(control_model.testing_df)
 ## Then the explode_yield() function of the load_format_data.py program is run using the testing_df of the mdl object.
-## The output is tored in exploded_df. The y_std column in exploded_df os accessed and the mean squarred os calculated and stored in exp_var
+## The output is tored in exploded_df. The y_std column in exploded_df is accessed and the mean squarred is calculated and stored in exp_var
 exp_var=np.average(np.square(np.array(exploded_df['y_std'])))
 ## Then the explode_yield() function of the load_format_data.py program is run on the training_df of the mdl object.
 ## The output is again stored in exploded_df. The y_std column of it is accessed and the mean squarred value of that column is store in cv_exp_var
