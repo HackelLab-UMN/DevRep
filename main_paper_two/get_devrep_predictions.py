@@ -1,6 +1,5 @@
 import time
 start_time=time.time()
-
 import submodels_module as mb
 import load_format_data
 import pandas as pd 
@@ -63,5 +62,3 @@ df_original.to_pickle('./datasets/'+df[0]+'_with_predictions.pkl')
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
-
-

@@ -12,17 +12,29 @@ import numpy as np
 def main():
 
     toggle_no=int(sys.argv[1])
-
-
+    ## If this function is run, then the program must be run through the terminal, with an integer input. The integer input must be within
+    ## the following range [0,4]. This integer input is stored in the variable toggle_no. 
     # c_models=['ridge','fnn','emb_fnn_flat','emb_fnn_maxpool','emb_fnn_maxpool_linear','emb_rnn','small_emb_rnn','small_emb_atn_rnn','small_emb_rnn_linear',
     #     'emb_cnn','small_emb_cnn','small_emb_atn_cnn','small_emb_cnn_linear']
     c_models=['ridge','fnn','emb_fnn_flat','small_emb_rnn_linear','emb_cnn']
+    ## A string list, c_models is created which has different types of regression models in it. 
     for ss in [0.01,0.1,.5]:
+        ## An interable object ss is created to iterate through the list containing different sample sizes. 
         c=modelbank.seq_to_assay_model([1,8,10],c_models[toggle_no],ss)
+        ## For each sample size, a seq_to_assay_model object defined in the submodels_module.py program is created. It is instantiated with a
+        ## integer list listing the assays to be used to build the model, the 'toggle_no' index of the c_models to determine the regression model used
+        ## and the ss iterbale to determine different sample fractions. 
         c.cross_validate_model()
         c.test_model()
+        ## Then the cross_validate_model() function of the parent model class is run
+        ## This determines the hyperparameters for the regression model.  Finally the
+        ## hyperparameters are used along with the training dataset to train the regression model in the test_model() function.
         c.save_predictions()
+        ## Then the save_predictions() function defined in the x_to_assay_model parent class is used to save the assay score predictions
+        ## of the test dataset to use with the assay_to_yield_model predictions. 
         if 'emb' in c_models[toggle_no]:
+            ## If the regression model used is of an embedded format then the save_sequence_embeddings() function defined in the 
+            ## x_to_assay_model parent class is run to save the sequence embeddings of the model built above. 
             c.save_sequence_embeddings()
 
 
@@ -31,6 +43,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+## Given that the function defined above is named main, the function is run in the following if statement. 
 
 # c_models=['ridge','fnn','emb_fnn_flat','emb_fnn_maxpool','emb_fnn_maxpool_linear','emb_rnn','small_emb_rnn','small_emb_atn_rnn','small_emb_rnn_linear',
 #         'emb_cnn','small_emb_cnn','small_emb_atn_cnn','small_emb_cnn_linear']
