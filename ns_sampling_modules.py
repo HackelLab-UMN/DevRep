@@ -102,6 +102,56 @@ def sample(nb_of_sequences, Nb_positions, generator,minval=0,maxval=21):
     return generator.uniform(shape=[nb_of_sequences, Nb_positions], minval=minval, maxval=maxval, dtype=tf.int64).numpy()
     # have two generators
 
+def make_sampling_data_force(generator,force=None,Nb_sequences=100,Nb_positions=16):
+    '''
+    note this function only works when initially sampling data not correcting for mutations, etc.
+    :param generator: tensorflow generator to generator random data
+    :param force:  a dictionary showing what positions to force with which amino acids
+    :param Nb_sequences:
+    :return:
+    '''
+    if bool(force) is False:
+        return make_sampling_data(generator=generator,Nb_sequences=Nb_sequences,Nb_positions=Nb_positions)
+    df=pd.DataFrame()
+    cpos=1
+    if force is None:
+        force={'7':cpos,'6':cpos,'36':cpos}
+
+    P=convert_labels_2_ordinal(force)
+    p=convert2numpy(df=P,field='ordinal')
+    seq = sample(nb_of_sequences=Nb_sequences, Nb_positions=Nb_positions, generator=generator)
+    for k in np.arange(Nb_positions):
+        # at the kth position in every sequence
+
+        if k not in p:
+            seq[:, k] = remove_blanks(random_AA_pos=np.ones((Nb_sequences)) * k, random_AA=seq[:, k].copy(), seq=seq,
+                                  generator=generator)
+        else:
+            idx=np.argmax(p==k)
+            AA=convert2numpy(df=P, field='AA')
+            seq[:,k]= AA[idx]
+
+
+    return convert2pandas(seq)
+
+
+
+
+
+def convert_labels_2_ordinal(force):
+    '''
+    :param force: a dictionary showing what positions to force with which amino acids
+    :return:a dataframe with columns key , ordinal , and AA, which is the forced amino acid
+    '''
+    labels = np.array(
+        ['7', '8', '9', '9b', '9c', '10', '11', '12', '34', '35', '36', '36b', '36c', '37', '38', '39', 'Loop 1 (8-11)',
+         'Loop 2 (34-39)', 'Loop 1 & Loop 2'])
+    P = pd.DataFrame()
+    for k,j in zip(force.keys(),range(len(force))):
+        P.loc[j,'key']=k
+        P.loc[j,'ordinal']=np.argmax(labels == k)
+        P.loc[j,'AA']=force[k]
+    return P
 
 def make_sampling_data(generator, Nb_sequences=1000, Nb_positions=16):
     '''
@@ -129,7 +179,6 @@ def _unit_tests_accuracy_blank_removal():
     random_AA = np.array([4, 19])
     random_AA_pos = np.array([4, 12])
     remove_blanks(random_AA=random_AA, random_AA_pos=random_AA_pos, seq=seq, generator=g_parent)
-
 
 
 

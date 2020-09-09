@@ -1,4 +1,4 @@
-import ns_nested_sampling as ns
+import ns_nested_sampling_ray as ns
 import numpy as np
 from contextlib import contextmanager
 import os
@@ -9,17 +9,17 @@ import ns_show_results as sr
 
 def driver(c,suppress_output=False):
     check_inputs(c=c)
-    trial1 = ns.ns_random_sample(Nb_sequences=c.Nb_sequences)
+    trial1 = ns.nested_sampling(Nb_sequences=c.Nb_sequences)
     step = c.nb_loops // c.nb_snapshots
     loops_2_show=np.arange(0,c.nb_loops+step,step)
     loops_2_show[-1]=c.nb_loops-1
     if suppress_output is True:
         with suppress_stdout():
-            trial1.nested_sample(c=c,loops_2_show=loops_2_show)
+            times=trial1.nested_sample(c=c,loops_2_show=loops_2_show)
     else:
         times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)
-        print(times)
         return times
+    print(times)
 @contextmanager
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
@@ -42,11 +42,11 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=20000,
+c=inputs(nb_loops=25,
          nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=25,
+         nb_snapshots=5,
          Nb_sequences=10000)
 
 if sys.platform=='darwin':
@@ -54,8 +54,8 @@ if sys.platform=='darwin':
 else:
     suppress_output=True
 
-driver(c=c,suppress_output=suppress_output)
-sr.main(C=[c])
+driver(c=c,suppress_output=True)
+# sr.main(C=[c])
 
 
 

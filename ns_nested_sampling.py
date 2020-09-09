@@ -138,16 +138,19 @@ class nested_sampling(ABC):
         pass
 
     # private methods
-    def get_yield(self,df_only=None):
+    def get_yield(self,df_only=None,yield2show=None):
         '''
         gets the predicted yield from a model
         uses the models specified in the constructor for s2a and e2y.
         e2y must have a seperate intilization for each model.
         :param df_only: if just passing in the data frame// not nested sampling
+        :param yield2show: 2x1 numpy array of booleans of yields to return  [ iq yield, sh yield] if iq and sh yield are both
+            true then it will return the sum of the two
         :return: updates self.test_seq if running nested_sampling() function. otherwise updates
         the dataframe with 'developability' column.
         '''
-
+        if yield2show is None:
+            yield2show=np.array([True , True ])
         if df_only is None :
             df=self.test_seq.copy()
         else :
@@ -157,8 +160,20 @@ class nested_sampling(ABC):
 
         predicted_yield_per_model = []
         for e2y in self.e2y:
-            predicted_yield_per_model.append(e2y.save_predictions(input_df_description=df_with_embbeding))
-        df['Developability'] = np.copy(np.average(predicted_yield_per_model, axis=0))
+            predicted_yield_per_model.append(e2y.save_predictions(input_df_description=df_with_embbeding,yield2show=yield2show))
+        # determine which yield are optimizing wrt
+        if np.count_nonzero(yield2show)>1:
+            name='Developability'
+        elif yield2show[0] :
+            name='IQ_Average_bc'
+        elif yield2show[1]:
+            name='SH_Average_bc'
+        else:
+            raise AttributeError('wrong inputs for yield2show')
+
+        df[name] = np.copy(np.average(predicted_yield_per_model, axis=0))
+
+
         if df_only is None:
             self.test_seq=df.copy()
 
@@ -251,6 +266,11 @@ class nested_sampling(ABC):
 class ns_random_sample(nested_sampling):
     # random sampling
     def __init__(self,Nb_sequences=1000,nb_models=1):
+        '''
+
+        :param Nb_sequences: number of sequences
+        :param nb_models: number of models to average over, as of right no support for over 1
+        '''
         super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
         # initilize generator
         seed = int.from_bytes(os.urandom(4), sys.byteorder)
@@ -352,15 +372,17 @@ class ns_random_sample(nested_sampling):
         :return: a tuple consisting of the class object and a nested tuple of the inputs to reconstruct the class
         '''
         return (self.__class__,(self.nb_of_sequences,self.nb_models))
+
+
 #TODO: write a bash script that opens an interactive job immedeatily after running
 # todo: continue adding comments to code
 
-class ns_percent_positve(ns_random_sample):
-
-    # todo : have the update number of mutations be different
-    def __init__(self,Nb_sequences,nb_models ):
-        super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
-    def update_nb_mutations(self):
-        
-        print('hello')
+# class ns_percent_positve(ns_random_sample):
+#
+#     # todo : have the update number of mutations be different based on the previous slope rather than percentage , or a combo of both
+#     def __init__(self,Nb_sequences,nb_models ):
+#         super().__init__(Nb_sequences=Nb_sequences,nb_models=nb_models)
+#     def update_nb_mutations(self):
+#
+#         print('hello')
 

@@ -44,8 +44,8 @@ class x_to_yield_model(model):
         super().__init__(model_in, 'yield', model_architecture, sample_fraction)
         self.get_output_and_explode = load_format_data.explode_yield
         self.plot_type = plot_model.x_to_yield_plot
-        self.training_df = load_format_data.load_df('assay_to_dot_training_data')
-        self.testing_df = load_format_data.load_df('seq_to_dot_test_data')
+        # self.training_df = load_format_data.load_df('assay_to_dot_training_data')
+        # self.testing_df = load_format_data.load_df('seq_to_dot_test_data')
         self.lin_or_sig = 'linear'
         self.num_cv_splits = 10
         self.num_cv_repeats = 10
@@ -117,9 +117,9 @@ class x_to_assay_model(model):
         self.assays = assays
         self.get_output_and_explode = partial(load_format_data.explode_assays, assays)
         self.plot_type = plot_model.x_to_assay_plot
-        self.training_df = load_format_data.load_df(
-            'seq_to_assay_train_1,8,10')  # could adjust in future for sequences with predictive assays
-        self.testing_df = load_format_data.load_df('assay_to_dot_training_data')
+       # self.training_df = load_format_data.load_df(
+         #   'seq_to_assay_train_1,8,10')  # could adjust in future for sequences with predictive assays
+        #self.testing_df = load_format_data.load_df('assay_to_dot_training_data')
         self.lin_or_sig = 'sigmoid'
         self.num_cv_splits = 3
         self.num_cv_repeats = 3
@@ -356,7 +356,7 @@ class sequence_embeding_to_yield_model(x_to_yield_model, sequence_embedding_to_x
 
 
 class final_sequence_embeding_to_yield_model(sequence_embeding_to_yield_model):
-    'look at class name, but done with better train/test split'
+    'look at class yield2optimize, but done with better train/test split'
     def __init__(self, seq_to_assay_model_prop, model_architecture, sample_fraction):
         super().__init__(seq_to_assay_model_prop, model_architecture, sample_fraction)
         self.update_model_name('final' + self.model_name)

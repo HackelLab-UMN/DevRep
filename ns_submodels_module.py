@@ -80,35 +80,51 @@ class ns_sequence_embeding_to_yield_model(mb.sequence_embeding_to_yield_model):
         super().__init__(s2a_params,*e2y_params)
         self.model_no=s2a_params[-1]
     def init_e2y_model(self):
+        '''
+        this loads the sklearn svm model that into the object
+        :return:
+        '''
         self.load_model(self.model_no)
 
-    def save_predictions(self, input_df_description=None):
+    def save_predictions(self, input_df_description=None,yield2show=None):
         '''saves model predictions for nested sampling
             input_df_description : must be a dataframe with a column that contains the learned embedding as saved
             by ns_seq_to_assay_model.save_sequence_embeddings() as shown above.
+            yield2show: array of booleans of yields to return  [ iq yield, sh yield] if iq and sh yield are both
+            true then it will return the sum of the two
         '''
+        if yield2show is None:
+            yield2show=np.array([True, True])
         df=input_df_description.copy()
         x_a = self.get_input_seq(df, self.model_no)
         OH_matrix = np.eye(2)
-        matrix_col = ['IQ_Average_bc', 'SH_Average_bc']
-        for i in range(2):
+        OH_matrix=OH_matrix[yield2show,:].copy()
+        matrix_col = np.array(['IQ_Average_bc', 'SH_Average_bc'])
+        matrix_col=matrix_col[yield2show].copy()
+        p=[]
+        for i in range(len(matrix_col)):
             cat_var = []
             for j in x_a:
                 cat_var.append(OH_matrix[i].tolist())
             x = load_format_data.mix_with_cat_var(x_a, cat_var)
             df_prediction = self._model.model.predict(x).squeeze().tolist()
             col_name = matrix_col[i]
-            df.loc[:, col_name] = df_prediction
-            col_name_std = matrix_col[i] + '_std'
-            df.loc[:, col_name_std] = [0] * len(df_prediction)
-         # if this a monte carlo sampling call , return the averaged predictions for the model
-        return self.avg_prediction(df)
+            if len(matrix_col) is 1:
+                return  df_prediction
+            p.append(df_prediction)
+        # return a sum of the two
+        return np.sum(p,axis=0)
 
+# this function doesn't matter anymore
 
-
-    def avg_prediction(self, df):
-        'load predictions and add the two cell types yield together'
-        predicted_iq_yield = df['IQ_Average_bc'].to_numpy()
-        predicted_sh_yield = df['SH_Average_bc'].to_numpy()
-        predicted_added_yield = np.sum([predicted_iq_yield, predicted_sh_yield], axis=0)
-        return predicted_added_yield
+    # def avg_prediction(self, df):
+    #     '''
+    #
+    #     :param df: dataframe with columns IQ_Average_bc and SH_Average_bc
+    #     :return:
+    #     '''
+    #     'load predictions and add the two cell types yield together'
+    #     predicted_iq_yield = df['IQ_Average_bc'].to_numpy()
+    #     predicted_sh_yield = df['SH_Average_bc'].to_numpy()
+    #     predicted_added_yield = np.sum([predicted_iq_yield, predicted_sh_yield], axis=0)
+    #     return predicted_added_yield

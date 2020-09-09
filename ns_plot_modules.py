@@ -36,7 +36,7 @@ def violin_saved_dataset(c,loops_2_show,y_lim=None):
 
     labels=[]
     for k in np.arange(len(loops_2_show)):
-        # read pickle file
+        # read parralel file
         # s=strings[k]
         # n=numbers[k]
 
@@ -105,10 +105,10 @@ def make_percent_positive_plot(c,percent_pos):
 
     '''
     'makes the percent positive plot '
-    pp = []
-    for i in np.arange(c.nb_loops):
-        pp.append(sum(percent_pos[i])/ c.nb_steps) # Right now percent postive is just the average ...
-    plt.plot(np.arange(c.nb_loops).tolist(), pp)
+    # pp = []
+    # for i in np.arange(c.nb_loops):
+    #     pp.append(sum(percent_pos[i])/ c.nb_steps) # Right now percent postive is just the average ...
+    plt.plot(np.arange(c.nb_loops).tolist(), percent_pos)
     plt.title('percent accepted vs. for each loop')
     plt.ylabel('percent accepted')
     plt.xlabel('# of loops')
@@ -117,6 +117,15 @@ def make_percent_positive_plot(c,percent_pos):
 
 
 def plot_hist(c, i, j, seq,bins=50):
+    '''
+
+    :param c: inputs() object
+    :param i: step number
+    :param j: loop number
+    :param seq: dataframe containing developability column
+    :param bins: # of bins to have in histogram
+    :return: saves a histogram to folder specified by c
+    '''
     # future version
     print('Plotting histogram Step:%i,Loop%i' % (i, j))
     dev=seq['Developability'].to_numpy()
@@ -220,7 +229,7 @@ def showFieldvsLoops(c, field2Show):
 
     :param c: inputs() object
     :param field2Show: what thing to show ?
-    :return: shows a plot of specified field reading from pickle files in inputs() object
+    :return: shows a plot of specified field reading from parralel files in inputs() object
 
     '''
 
@@ -279,6 +288,8 @@ def twinAxisvsLoops(c,fields2show):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     plt.savefig(dm.make_file_name(c=c, file_description='%s_vs_%s_plot'%(fields2show[0],fields2show[1]), fileformat='png'))
     plt.close(fig)
+
+
 def compare(C,field2Show):
     '''
     compare fields across runs

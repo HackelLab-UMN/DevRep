@@ -24,20 +24,16 @@ def make_directory(c):
 def make_sequence_filename(loop_nb):
     return 'sequences_loop_%i'%loop_nb
 
-def take_snapshot(self,c,loop_nb,loops_done):
+def take_snapshot(self,c,loop_nb,times):
     # make the dataframe
     #todo: init a class that allows for different saving of data depending on run.
     n=names()
     self.original_seq.to_pickle(path=make_file_name(c=c, file_description=make_sequence_filename(loop_nb=loop_nb+1)))
-    self.times.to_pickle(path=make_file_name(c,file_description=n.times_fn))
-    to_pickle(c=c,data=loops_done,data_name= n.loops_done_fn)
+    times.to_pickle(path=make_file_name(c,file_description=n.times_fn))
     to_pickle(c=c,data=self.nb_mutations,data_name=n.nb_mutation_fn)
     to_pickle(c=c, data=self.min_yield,data_name=n.min_yield_fn)
    # self.rng_times.to_pickle(path=make_file_name(c=c,file_description=n.random_fn))
-    pp = []
-    for i in np.arange(loop_nb):
-        pp.append(sum(self.percent_pos[i]) / len(self.percent_pos[i]))
-    to_pickle(c=c,data=pp,data_name=n.pp_fn)
+    to_pickle(c=c,data=self.percent_pos,data_name=n.pp_fn)
 
 
 def to_pickle(c,data,data_name):

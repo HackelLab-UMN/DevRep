@@ -5,7 +5,7 @@ import random
 from sklearn.model_selection import ShuffleSplit
 
 def load_df(file_name):
-    'set name where datasets are found'
+    'set yield2optimize where datasets are found'
     return pd.read_pickle('./datasets/'+file_name+'.pkl')
 
 def sub_sample(df,sample_fraction,seed=42):

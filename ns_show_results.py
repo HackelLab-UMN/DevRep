@@ -41,7 +41,7 @@ def gif_make(c, file_prefix='heatmap_loop'):
     :param c: inputs() object
     :param file_prefix: prefix the the png files to make a gif out of
     note: don't include the second underscore '_'
-    :return: a gif with the same file name as file_prefix
+    :return: a gif with the same file yield2optimize as file_prefix
     '''
     print('making gif for %s'%file_prefix)
     print(c)
@@ -175,5 +175,5 @@ def main(C):
         pm.twinAxisvsLoops(c=c,fields2show=[fn.pp_fn,fn.nb_mutation_fn])
         dm.zip_data(c=c)
 
-from ns_latest_runs import C
-main(C)
+# from ns_latest_runs import C
+# main(C)
