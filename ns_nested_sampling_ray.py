@@ -77,13 +77,14 @@ class nested_sampling():
         # lets design this right here.
         # first do some preprocessing
         self.nb_mutations.append(c.nb_mutations)
+        nproc = multiprocessing.cpu_count()
         self.dir_name= dm.make_directory(c=c)
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
-        dm.save_run_stats(c=c,loops_2_show=loops_2_show)
+        dm.save_run_stats(c=c,loops_2_show=loops_2_show,nproc=nproc)
         loops_done=[]
 
         # then need to initilize ray , etc.
-        nproc=multiprocessing.cpu_count()
+
         if ray.is_initialized() is True:
             ray.shutdown()
         ray.init()

@@ -48,7 +48,7 @@ def unzip_data(dir_name):
 
 
 
-#push_scripts(['ns_main_sampling.py']
+push_scripts(['ns_main_sampling.py'])
 # from ns_latest_runs import C
 #
 #
@@ -58,8 +58,8 @@ def unzip_data(dir_name):
 #TODO: make some file that says what files need to be pulled from msi, but that would be advanced.
 #zip_data(dir_name=sm.make_directory(Nb_steps=5,Nb_loops=3))
 # push_scripts(['main_DevRep_example.py'])
-
-push_scripts(['ns_main_sampling.py'])
+#push_scripts(['ns_main_sampling.py'])
+#pull_zipped_data(c=c)
 # note you should only push
 #push_scripts(['input_deck.py'])
 #pull_output_script(job_nb=22177757)

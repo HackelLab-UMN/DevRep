@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import os
 import sys
 from input_deck import inputs
+import multiprocessing
 # the input deck : specify these input parameters
 import ns_show_results as sr
 
@@ -19,6 +20,7 @@ def driver(c,suppress_output=False):
     else:
         times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)
         return times
+    print('with %i cpus'%multiprocessing.cpu_count())
     print(times)
 @contextmanager
 def suppress_stdout():
@@ -42,12 +44,12 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=25,
+c=inputs(nb_loops=30000,
          nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=5,
-         Nb_sequences=10000)
+         nb_snapshots=30,
+         Nb_sequences=80000)
 
 if sys.platform=='darwin':
     suppress_output = False

@@ -42,7 +42,7 @@ def to_pickle(c,data,data_name):
     df.to_pickle(path=make_file_name(c=c, file_description=data_name))
 
 
-def save_run_stats(c,loops_2_show):
+def save_run_stats(c,loops_2_show,nproc):
     # save initial run stats
     stats=pd.DataFrame()
     stats.loc[0,'nb_loops']=c.nb_loops
@@ -50,6 +50,7 @@ def save_run_stats(c,loops_2_show):
     stats.loc[0,'start mutation number']=c.nb_mutations
     stats.loc[0,'mutation_type']=c.mutation_type
     stats.loc[0,'Nb_sequences']=c.Nb_sequences
+    stats.loc[0,'nproc']=nproc
     stats['Loops to show']=sm.convert2pandas(np.array([loops_2_show]))
     stats.to_pickle(path=make_file_name(c=c,file_description='run_stats'))
 
