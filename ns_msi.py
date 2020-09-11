@@ -33,7 +33,7 @@ def pull_zipped_data(c):
 def pull_output_script(job_nb):
     job_nb=str(job_nb)
     #print(password + ' scp ' + OUT_SCRIPT + job_nb + ' ' + ML_DEVELOPABILITY + '/sampling_data')
-    os_out=os.system(password +' scp ' + MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.o'+ job_nb +' ' + LOCAL_DIRECTORY + '/sampling_data')
+    os_out=os.system(password +' scp ' + MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.e'+ job_nb +' ' + LOCAL_DIRECTORY + '/sampling_data')
     if os_out == 0:
         print('sucessfully transferred file: ' +  MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.o'+ job_nb +' to ' + LOCAL_DIRECTORY + '/sampling_data')
     else:
@@ -46,15 +46,22 @@ def unzip_data(dir_name):
     if os_out == 0:
         print('sucessfully unzipped data for ' + dir_name)
 
-
-
-push_scripts(['ns_main_sampling.py'])
+push_scripts(['ns_nested_sampling_ray.py','ns_main_sampling.py'])
+#push_scripts(['ns_main_sampling.py'])
+# push_scripts(['ray_for_many_cores.py'])
+#push_scripts(['ns_walk.py'])
 # from ns_latest_runs import C
 #
 #
 # for c in C:
 #     pull_zipped_data(c=c)
-
+# c=inputs(nb_loops=25,
+#          nb_steps=5,
+#          mutation_type='dynamic',
+#          nb_mutations=10,
+#          nb_snapshots=10,
+#          Nb_sequences=10000)
+# pull_zipped_data(c=c)
 #TODO: make some file that says what files need to be pulled from msi, but that would be advanced.
 #zip_data(dir_name=sm.make_directory(Nb_steps=5,Nb_loops=3))
 # push_scripts(['main_DevRep_example.py'])
@@ -62,7 +69,7 @@ push_scripts(['ns_main_sampling.py'])
 #pull_zipped_data(c=c)
 # note you should only push
 #push_scripts(['input_deck.py'])
-#pull_output_script(job_nb=22177757)
+#pull_output_script(job_nb=22541519)
 #pull_zipped_data(nb_steps=5,nb_loops=10000,nb_mutations=6,mutation_type='static')
 #push_scripts(['submodels_module.py','ns_main_sampling.py'])
 

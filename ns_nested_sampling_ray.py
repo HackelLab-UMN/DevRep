@@ -77,7 +77,7 @@ class nested_sampling():
         # lets design this right here.
         # first do some preprocessing
         self.nb_mutations.append(c.nb_mutations)
-        nproc = multiprocessing.cpu_count()
+        nproc = 50 #multiprocessing.cpu_count()
         self.dir_name= dm.make_directory(c=c)
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
         dm.save_run_stats(c=c,loops_2_show=loops_2_show,nproc=nproc)
@@ -87,8 +87,7 @@ class nested_sampling():
 
         if ray.is_initialized() is True:
             ray.shutdown()
-        ray.init()
-
+        ray.init(address='auto',ignore_reinit_error=True)
 
 
         # preprocessing for ray. split the pandas dataframes, then get the length of each
@@ -101,9 +100,10 @@ class nested_sampling():
         # initilize workers
         walkers = [nw.walk.remote(i, c.nb_steps, self.yield2optimize) for i in inputs]
 
-
+        print('init yield')
         # find the initial yield, return the min yield from each worker
         res=ray.get([walker.init_yield.remote() for walker in walkers])
+        print('got yields from everyone')
         self.min_yield.append(np.min(res))
         self.percent_pos.append(1) # we accept everything on the first look at yield
         self.nb_mutations.append(c.nb_mutations) # set the number of mutations to what is specified by inputs() object
@@ -146,8 +146,8 @@ class nested_sampling():
                 pm.make_heat_map(df=self.original_seq, c=c, loop_nb=j)
                 dm.zip_data(c=c)
 
-        pm.make_min_yield_plot(min_yield_lst=self.min_yield, c=c)
-        pm.make_percent_positive_plot(c=c, percent_pos=self.percent_pos)
+        # pm.make_min_yield_plot(min_yield_lst=self.min_yield, c=c)
+        # pm.make_percent_positive_plot(c=c, percent_pos=self.percent_pos)
         # TODO: plot the rate of change of min yield as well ...
         return times
 

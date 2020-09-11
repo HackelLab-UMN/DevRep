@@ -44,19 +44,19 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=30000,
-         nb_steps=5,
+c=inputs(nb_loops=3,
+         nb_steps=2,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=30,
-         Nb_sequences=80000)
+         nb_snapshots=3,
+         Nb_sequences=20000)
 
 if sys.platform=='darwin':
     suppress_output = False
 else:
     suppress_output=True
 
-driver(c=c,suppress_output=True)
+driver(c=c,suppress_output=False)
 # sr.main(C=[c])
 
 

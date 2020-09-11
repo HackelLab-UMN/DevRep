@@ -43,6 +43,9 @@ class walk():
         self.nb_steps=nb_steps
         self.idx=None
 
+        # ray optimizer
+       # os.environ["OMP_NUM_THREADS"] = str(os.cpu_count())
+
 
     def walk(self,min_yield,nb_mutations):
         percent_pos=[]
@@ -202,3 +205,5 @@ class walk():
 
         print(dev[self.idx])
         print(dev[change_2_seq])
+
+
