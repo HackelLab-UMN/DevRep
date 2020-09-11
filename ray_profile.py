@@ -10,11 +10,12 @@ import time
 import sys,os
 import ns_walk as nw
 
+#
+# nproc=np.arange(16,72,8)
+# sequence=np.arange(20000,200000,20000)
 
-nproc=np.arange(16,72,8)
-sequence=np.arange(20000,200000,20000)
-
-
+nproc=np.arange(3,9,2)
+sequence=np.arange(5000,20000,5000)
 for n in nproc:
     t = []
     for s in sequence:
@@ -33,7 +34,7 @@ for n in nproc:
 
         walkers = [nw.walk.remote(i, 1, 'Developability') for i in inputs]
 
-        walkers[0].reset()
+
         # find the initial yield, return the min yield from each worker
         res=ray.get([walker.init_yield.remote() for walker in walkers])
         min_yield=[np.min(res)]
@@ -42,6 +43,8 @@ for n in nproc:
         res=ray.get([walker.walk.remote(min_yield[0],16) for walker in walkers])
 
         t.append(time.time()-start)
+
+        # [walker.reset() for walker in walkers]
 
 
 

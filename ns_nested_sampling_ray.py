@@ -85,11 +85,11 @@ class nested_sampling():
 
         # then need to initilize ray , etc.
 
-        if ray.is_initialized() is True:
-            ray.shutdown()
-        ray.init(address='auto',ignore_reinit_error=True)
+        # if ray.is_initialized() is True:
+        #     ray.shutdown()
+        # ray.init(address='auto',ignore_reinit_error=True)
 
-
+        ray.init(ignore_reinit_error=True)
         # preprocessing for ray. split the pandas dataframes, then get the length of each
         inputs = sm.splitPandas(df=self.original_seq, nb_splits=nproc)
         lengths=[]
