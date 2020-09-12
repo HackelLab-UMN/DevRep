@@ -10,12 +10,13 @@ import time
 import sys,os
 import ns_walk as nw
 
-#
+import ns_data_modules as dm
 # nproc=np.arange(16,72,8)
 # sequence=np.arange(20000,200000,20000)
 
 nproc=np.arange(3,9,2)
 sequence=np.arange(5000,20000,5000)
+times = pd.DataFrame()
 for n in nproc:
     t = []
     for s in sequence:
@@ -49,17 +50,17 @@ for n in nproc:
 
 
     # save states of those processor numbers
-    df = pd.DataFrame()
-    df.loc[:,'times'] =t
-    df.to_pickle(path='./sampling_data/comparisons/ray/profile_maxs_%i_maxn_%i.pkl'%(np.max(nproc),np.max(sequence)))
-    plt.plot(sequence,t,label=n)
 
+    times.loc[:,'nproc: %i'%n] =t
+    times.to_pickle(path='./sampling_data/comparisons/ray/profile_maxs_%i_maxn_%i.pkl'%(np.max(nproc),np.max(sequence)))
+    plt.plot(sequence,t,label=n)
+    dm.zip_directory(dir_name='comparisons/ray',zip_filename='ray')
 plt.legend()
-plt.title('profilig with ray')
+plt.title('profiling with ray')
 plt.xlabel('number of sequences')
 plt.ylabel('number of processors')
 plt.savefig('./sampling_data/comparisons/ray/profile_maxs_%i_maxn_%i.png'%(np.max(nproc),np.max(sequence)))
-
+dm.zip_directory(dir_name='comparisons/ray',zip_filename='ray')
 
 
 

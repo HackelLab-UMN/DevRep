@@ -18,6 +18,13 @@ def zip_data(c):
         cmd=cmd+' ./sampling_data/'+dir_name+'/'+i
     os.system(cmd)
 
+def zip_directory(dir_name,zip_filename):
+    lst = os.listdir(path='./sampling_data/' + dir_name)
+    cmd = 'zip ./sampling_data/' + dir_name + '/' + zip_filename + '.zip'
+    for i in lst:
+        cmd = cmd + ' ./sampling_data/' + dir_name + '/' + i
+    os.system(cmd)
+
 def make_directory(c):
     return 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i_%s_%i'%(c.Nb_sequences,c.nb_steps,c.nb_loops,c.mutation_type,c.nb_mutations)
 
