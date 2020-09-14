@@ -1,10 +1,10 @@
 import ray
 import ns_submodels_module as ns_mb
 import os,sys
-import tensorflow as tf
 import numpy as np
 import ns_nested_sampling as ns
 import ns_sampling_modules as sm
+import tensorflow as tf
 @ray.remote
 class walk():
     def __init__(self, df=None,nb_steps=5, yield2optimize='Developability',profile=False):
@@ -15,11 +15,14 @@ class walk():
         '''
         seed_parent = int.from_bytes(os.urandom(4), sys.byteorder)
         # seed_parent=8
+        # tensorflow optimizer
+        tf.config.optimizer.set_jit(True)
         self.g = tf.random.experimental.Generator.from_seed(seed_parent)
         self.rng = np.random.default_rng()
         e2y_params = ['svm', 1]
         s2a_params = [[1, 8, 10], 'emb_cnn', 1]
 
+        # tensorflow model
         self.s2a = ns_mb.ns_seq_to_assay_model(s2a_params)
         self.s2a.init_sequence_embeddings()
         # todo:  is to put these two objects in the memory store
@@ -37,6 +40,8 @@ class walk():
         else:
             self.nb_of_sequences = len(df.index)
             self.test_seq = df.copy()
+
+
 
 
 
