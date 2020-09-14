@@ -4,6 +4,8 @@ import  pandas as pd
 import  numpy as np
 import ns_sampling_modules as sm
 from input_deck import names
+from contextlib import contextmanager
+import sys
 
 
 def make_file_name(c,file_description,fileformat='pkl'):
@@ -64,3 +66,12 @@ def save_run_stats(c,loops_2_show,nproc):
 def read_pickle(c,file_description):
     return pd.read_pickle(make_file_name(c=c, file_description=file_description))
 
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout

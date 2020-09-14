@@ -17,32 +17,40 @@ import ns_data_modules as dm
 nproc=np.arange(3,9,2)
 sequence=np.arange(5000,20000,5000)
 times = pd.DataFrame()
+
+ray.init(ignore_reinit_error=True)
+seed_parent = int.from_bytes(os.urandom(4), sys.byteorder)
+g_parent = tf.random.experimental.Generator.from_seed(seed_parent)
+# find number of shared memory cores
+nb_steps=1
+nb_mutations=16
+yield2optimize='Developability'
+
+cpus=8
+walkers = [nw.walk.remote(nb_steps=nb_steps, yield2optimize=yield2optimize,profile=True) for _ in range(cpus)]
 for n in nproc:
-    t = []
+    t=[]
     for s in sequence:
         print('sequences: %i, nproc: %i'%(s,n))
         # if ray.is_initialized() is True:
         #     ray.shutdown()
-
-        ray.init(ignore_reinit_error=True)
-        seed_parent = int.from_bytes(os.urandom(4), sys.byteorder)
-        g_parent = tf.random.experimental.Generator.from_seed(seed_parent)
-
         df = pd.DataFrame()
-        df['Ordinal'] = sm.make_sampling_data(generator=g_parent, Nb_sequences=s)
-
+        with dm.suppress_stdout():
+            df['Ordinal'] = sm.make_sampling_data(generator=g_parent, Nb_sequences=s)
         inputs = sm.splitPandas(df=df, nb_splits=n)
+        # for the walkers already initilized:  just change the dataframe
 
-        walkers = [nw.walk.remote(i, 1, 'Developability') for i in inputs]
+        ray.get([walker.set_df.remote(i) for walker,i in zip(walkers[0:n],inputs)])
 
-
+        # for walkers not already initilzed. add new ones!!
         # find the initial yield, return the min yield from each worker
-        res=ray.get([walker.init_yield.remote() for walker in walkers])
+
+        res=ray.get([walker.init_yield.remote() for walker in walkers[0:n]])
         min_yield=[np.min(res)]
         start = time.time()
 
-        res=ray.get([walker.walk.remote(min_yield[0],16) for walker in walkers])
-
+        with dm.suppress_stdout():
+            res=ray.get([walker.walk.remote(min_yield[0],nb_mutations) for walker in walkers[0:n]])
         t.append(time.time()-start)
 
         # [walker.reset() for walker in walkers]
@@ -56,12 +64,12 @@ for n in nproc:
     plt.plot(sequence,t,label=n)
     dm.zip_directory(dir_name='comparisons/ray',zip_filename='ray')
 plt.legend()
-plt.title('profiling with ray')
+plt.title('profiling with ray:nb mutations %i,steps: %i'%(nb_mutations,nb_steps))
 plt.xlabel('number of sequences')
 plt.ylabel('number of processors')
 plt.savefig('./sampling_data/comparisons/ray/profile_maxs_%i_maxn_%i.png'%(np.max(nproc),np.max(sequence)))
 dm.zip_directory(dir_name='comparisons/ray',zip_filename='ray')
 
 
-
+print(times)
 

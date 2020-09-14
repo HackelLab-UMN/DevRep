@@ -46,20 +46,22 @@ def unzip_data(dir_name):
     if os_out == 0:
         print('sucessfully unzipped data for ' + dir_name)
 
-def pull_zipped_file(filename):
+def pull_zipped_file(dir,filename):
     '''
 
     :param filename: from DevRep root
     :return:
     '''
-    os_out = os.system(password + ' scp ' + MSI_DIRECTORY +filename+ ' ' + LOCAL_DIRECTORY +filename)
+    os_out = os.system(password + ' scp ' + MSI_DIRECTORY +dir+filename+ ' ' + LOCAL_DIRECTORY +dir)
     if os_out==0:
-        print('sucessfully transferred file: ' + MSI_DIRECTORY +filename+ ' to ' + LOCAL_DIRECTORY +filename)
+        print('sucessfully transferred file: ' + MSI_DIRECTORY +dir+filename+ ' to ' + LOCAL_DIRECTORY +dir)
     else:
-        raise SystemError('error transferring file: ' + MSI_DIRECTORY +filename+ ' to ' + LOCAL_DIRECTORY +filename)
+        raise SystemError('error transferring file: ' + MSI_DIRECTORY +dir+filename+ ' to ' + LOCAL_DIRECTORY +dir)
 
 # push_scripts(['ns_nested_sampling_ray.py','ns_main_sampling.py'])
-push_scripts(['/comparisons/ray/ray_profile.py'])
+# push_scripts(['/comparisons/ray/ray_profile.py'])
+push_scripts(['ray_profile.py','ns_walk.py'])
+#pull_zipped_file(dir='/sampling_data/comparisons/ray',filename='/ray.zip')
 #push_scripts(['ns_main_sampling.py'])
 # push_scripts(['ray_for_many_cores.py'])
 #push_scripts(['ns_walk.py'])

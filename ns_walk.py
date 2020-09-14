@@ -7,7 +7,7 @@ import ns_nested_sampling as ns
 import ns_sampling_modules as sm
 @ray.remote
 class walk():
-    def __init__(self, df,nb_steps, yield2optimize='Developability'):
+    def __init__(self, df=None,nb_steps=5, yield2optimize='Developability',profile=False):
         '''
 
         walk class for doing random walks across multiple cpus
@@ -25,9 +25,20 @@ class walk():
         # todo:  is to put these two objects in the memory store
         self.e2y = ns_mb.ns_sequence_embeding_to_yield_model(s2a_params + [0], e2y_params)
         self.e2y.init_e2y_model()
-        self.nb_of_sequences=len(df.index)
+
+        # set df to none if none specified
         self.df = df
-        self.test_seq=df.copy()
+
+        if self.df is None:
+            if not profile:
+                raise Exception('df is none but yet you didnt set profiling flag to true')
+            self.nb_of_sequences=None
+            self.test_seq=None
+        else:
+            self.nb_of_sequences = len(df.index)
+            self.test_seq = df.copy()
+
+
 
         if yield2optimize == 'Developability':
             self.yield2show=np.array([True,True])
@@ -66,6 +77,11 @@ class walk():
 
     def get_df(self):
         return self.df
+
+    def set_df(self,df):
+        self.df=df
+        self.nb_of_sequences=len(df.index)
+        self.test_seq = df.copy()
 
 
     def multiple_mutate(self, nb_mutations):

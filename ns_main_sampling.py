@@ -5,6 +5,7 @@ import os
 import sys
 from input_deck import inputs
 import multiprocessing
+import ns_data_modules as dm
 # the input deck : specify these input parameters
 import ns_show_results as sr
 
@@ -15,22 +16,14 @@ def driver(c,suppress_output=False):
     loops_2_show=np.arange(0,c.nb_loops+step,step)
     loops_2_show[-1]=c.nb_loops-1
     if suppress_output is True:
-        with suppress_stdout():
+        with dm.suppress_stdout():
             times=trial1.nested_sample(c=c,loops_2_show=loops_2_show)
     else:
         times =  trial1.nested_sample(c=c,loops_2_show=loops_2_show)
         return times
     print('with %i cpus'%multiprocessing.cpu_count())
     print(times)
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:
-            yield
-        finally:
-            sys.stdout = old_stdout
+
 
 def check_inputs(c):
     if c.nb_loops<0 or c.nb_steps<0:
