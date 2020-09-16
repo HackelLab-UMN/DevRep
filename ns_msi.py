@@ -67,7 +67,7 @@ def pull_zipped_file(dir,filename):
 # push_scripts(['/comparisons/ray/ray_profile.py'])
 # push_scripts(['ray_profile.py'])
 # pull_zipped_file(dir='/sampling_data/comparisons/ray',filename='/ray.zip')
-push_scripts(['ns_main_sampling.py'])
+push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
 # push_scripts(['ray_for_many_cores.py'])
 #push_scripts(['ns_walk.py'])
 # from ns_latest_runs import C

@@ -96,7 +96,7 @@ class nested_sampling():
 
 
         # initilize workers
-        walkers = [nw.walk.remote(i, c.nb_steps, c.yield2optimize) for i in inputs]
+        walkers = [nw.walk.remote(df=i, nb_steps=c.nb_steps, yield2optimize=c.yield2optimize) for i in inputs]
 
         print('init yield')
         # find the initial yield, return the min yield from each worker
