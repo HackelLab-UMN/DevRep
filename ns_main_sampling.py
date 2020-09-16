@@ -37,13 +37,14 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=100000,
+c=inputs(nb_loops=50000,
          nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=20,
-         Nb_sequences=10000,
-         yield2optimize='SH_Average_bc')
+         nb_snapshots=25,
+         Nb_sequences=100000,
+         yield2optimize='Developability',
+         nb_cores=32)
 
 if sys.platform=='darwin':
     suppress_output = False

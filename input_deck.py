@@ -4,7 +4,7 @@ import pandas as pd
 # specify inputs right here
 class inputs():
     def __init__(self,nb_loops,nb_steps,mutation_type='static',nb_mutations=1,nb_snapshots=10,Nb_sequences=1000,
-                 yield2optimize='Developability'):
+                 yield2optimize='Developability',nb_cores=8):
         '''
 
         Class to specify input parameters for a run.
@@ -16,6 +16,7 @@ class inputs():
         :param nb_snapshots: how often to save the data.
         :param Nb_sequences: Number of sequences in a run
     `   :param yield2optimize: which yield to optimize shuffle('SH_Average_bc'), iq('IQ_Average_bc') , or sum of both ('Developability')
+        :param nb_cores: number of cores to specify for this job
         '''
 
         #just make all the rest of the parameters besides nb_sequences
@@ -27,6 +28,8 @@ class inputs():
         self.nb_mutations=nb_mutations
         self.Nb_sequences=Nb_sequences
         self.yield2optimize=yield2optimize
+        self.nb_cores=nb_cores
+
 
     def __repr__(self):
         return "inputs()"
