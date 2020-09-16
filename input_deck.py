@@ -3,7 +3,8 @@ import pandas as pd
 
 # specify inputs right here
 class inputs():
-    def __init__(self,nb_loops,nb_steps,mutation_type='static',nb_mutations=1,nb_snapshots=10,Nb_sequences=1000):
+    def __init__(self,nb_loops,nb_steps,mutation_type='static',nb_mutations=1,nb_snapshots=10,Nb_sequences=1000,
+                 yield2optimize='Developability'):
         '''
 
         Class to specify input parameters for a run.
@@ -14,7 +15,7 @@ class inputs():
      if dynamic then the number of mutations to start with.
         :param nb_snapshots: how often to save the data.
         :param Nb_sequences: Number of sequences in a run
-
+    `   :param yield2optimize: which yield to optimize shuffle('SH_Average_bc'), iq('IQ_Average_bc') , or sum of both ('Developability')
         '''
 
         #just make all the rest of the parameters besides nb_sequences
@@ -25,15 +26,18 @@ class inputs():
         self.mutation_type= mutation_type
         self.nb_mutations=nb_mutations
         self.Nb_sequences=Nb_sequences
+        self.yield2optimize=yield2optimize
 
     def __repr__(self):
         return "inputs()"
     def __str__(self):
-        return 'sequences: %i,loops: %i,steps: %i,mutations: %i,type: %s'%(self.Nb_sequences,
+        return 'sequences: %i,loops: %i,steps: %i,mutations: %i,type: %s, ' \
+               'yield2optimize: %s'%(self.Nb_sequences,
                                                                            self.nb_loops,
                                                                            self.nb_steps,
                                                                            self.nb_mutations,
-                                                                           self.mutation_type)
+                                                                           self.mutation_type,
+                                                                           self.yield2optimize)
 class names():
     def __init__(self):
         '''

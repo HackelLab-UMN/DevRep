@@ -42,7 +42,8 @@ c=inputs(nb_loops=3,
          mutation_type='dynamic',
          nb_mutations=10,
          nb_snapshots=3,
-         Nb_sequences=20000)
+         Nb_sequences=20000,
+         yield2optimize='Developability')
 
 if sys.platform=='darwin':
     suppress_output = False

@@ -28,7 +28,7 @@ def zip_directory(dir_name,zip_filename):
     os.system(cmd)
 
 def make_directory(c):
-    return 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i_%s_%i'%(c.Nb_sequences,c.nb_steps,c.nb_loops,c.mutation_type,c.nb_mutations)
+    return 'Nb_sequences_%i_Nbsteps_%i_Nb_loops_%i_%s_%i_y2o_%s'%(c.Nb_sequences,c.nb_steps,c.nb_loops,c.mutation_type,c.nb_mutations,c.yield2optimize)
 
 def make_sequence_filename(loop_nb):
     return 'sequences_loop_%i'%loop_nb
@@ -60,6 +60,7 @@ def save_run_stats(c,loops_2_show,nproc):
     stats.loc[0,'mutation_type']=c.mutation_type
     stats.loc[0,'Nb_sequences']=c.Nb_sequences
     stats.loc[0,'nproc']=nproc
+    stats.loc[0,'yield2optimize']=c.yield2optimize
     stats['Loops to show']=sm.convert2pandas(np.array([loops_2_show]))
     stats.to_pickle(path=make_file_name(c=c,file_description='run_stats'))
 

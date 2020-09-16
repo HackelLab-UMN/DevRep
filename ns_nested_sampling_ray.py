@@ -24,7 +24,7 @@ import ns_walk as nw
 # @wrap_non_picklable_objects
 class nested_sampling():
     # main method is to call is walk()
-    def __init__(self, Nb_sequences=1000,df_filename=None, yield2optimize='Developability',
+    def __init__(self, Nb_sequences=1000,df_filename=None,
                  Nb_positions=16,nb_models=1):
         'nested sampling initilization for number of sequences and number of positions of ordinals'
         # initilize default model parameters
@@ -36,7 +36,7 @@ class nested_sampling():
         if df_filename is None:
             self.original_seq=pd.DataFrame()
             self.original_seq['Ordinal']= sm.make_sampling_data(generator=self.g_parent,Nb_sequences=Nb_sequences,Nb_positions=Nb_positions)
-            self.original_seq[yield2optimize] = np.zeros(Nb_sequences)
+            # self.original_seq[yield2optimize] = np.zeros(Nb_sequences)
         else:
             self.original_seq=pd.read_pickle(path=df_filename)
 
@@ -56,7 +56,7 @@ class nested_sampling():
         self.dir_name=[]
         self.nb_mutations=[]
         self.run_stats=pd.DataFrame()
-        self.yield2optimize=yield2optimize
+        # self.yield2optimize=yield2optimize
 
     def nested_sample(self, c, loops_2_show=None):
         '''
@@ -77,18 +77,16 @@ class nested_sampling():
         # lets design this right here.
         # first do some preprocessing
         self.nb_mutations.append(c.nb_mutations)
-        nproc = 50 #multiprocessing.cpu_count()
+        nproc = multiprocessing.cpu_count()
         self.dir_name= dm.make_directory(c=c)
         fileError=os.system('mkdir ./sampling_data/'+self.dir_name)
         dm.save_run_stats(c=c,loops_2_show=loops_2_show,nproc=nproc)
-        loops_done=[]
 
         # then need to initilize ray , etc.
 
-        # if ray.is_initialized() is True:
-        #     ray.shutdown()
+        if ray.is_initialized() is True:
+            ray.shutdown()
         # ray.init(address='auto',ignore_reinit_error=True)
-
         ray.init(ignore_reinit_error=True)
         # preprocessing for ray. split the pandas dataframes, then get the length of each
         inputs = sm.splitPandas(df=self.original_seq, nb_splits=nproc)
@@ -98,7 +96,7 @@ class nested_sampling():
 
 
         # initilize workers
-        walkers = [nw.walk.remote(i, c.nb_steps, self.yield2optimize) for i in inputs]
+        walkers = [nw.walk.remote(i, c.nb_steps, c.yield2optimize) for i in inputs]
 
         print('init yield')
         # find the initial yield, return the min yield from each worker
