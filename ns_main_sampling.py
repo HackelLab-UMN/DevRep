@@ -37,21 +37,35 @@ def check_inputs(c):
     if c.Nb_sequences <0:
         raise AttributeError('Invalid # of sequences: %i'%c.Nb_sequences)
 
-c=inputs(nb_loops=50000,
-         nb_steps=5,
+# c=inputs(nb_loops=100000,
+#          nb_steps=5,
+#          mutation_type='dynamic',
+#          nb_mutations=10,
+#          nb_snapshots=25,
+#          Nb_sequences=10000,
+#          yield2optimize='Developability',
+#          nb_cores=8)
+
+
+c=inputs(nb_loops=4,
+         nb_steps=2,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=25,
-         Nb_sequences=100000,
+         nb_snapshots=4,
+         Nb_sequences=10000,
          yield2optimize='Developability',
-         nb_cores=32)
+         nb_cores=8)
+
+#todo:
+# find a way to get the number of cores on a numa node
+# stop output from cores so their is no core files in your directories.
 
 if sys.platform=='darwin':
     suppress_output = False
 else:
     suppress_output=True
 
-driver(c=c,suppress_output=suppress_output)
+driver(c=c,suppress_output=False)
 # sr.main(C=[c])
 
 

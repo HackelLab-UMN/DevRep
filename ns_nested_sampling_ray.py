@@ -114,7 +114,8 @@ class nested_sampling():
             # maybe make a function called update sequence configuration, call it at start of walk every single time
             start=time.time()
             # walk the sequences on seperate cpus
-            print('going to cpus')
+            # print('going to cpus')
+            print('loop %i '%j)
             res=ray.get([walker.walk.remote(self.min_yield[-1],self.nb_mutations[-1]) for walker in walkers])
             # update min yield
             min_yield=[r[0] for r in res]

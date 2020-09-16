@@ -52,7 +52,7 @@ def remove_blanks(random_AA_pos, random_AA, seq, generator):
     size=[-1]
     while change_blanks.any():
         size.append(np.count_nonzero(change_blanks))
-        print('change these blanks %i' % size[-1])
+        # print('change these blanks %i' % size[-1])
         random_AA[change_blanks] = sample(nb_of_sequences= size[-1],Nb_positions= 0, generator=generator)
         change_blanks = incorrect_blanks(random_AA=random_AA, random_AA_pos=random_AA_pos, seq=seq)
     return random_AA

@@ -4,6 +4,7 @@ import os,sys
 import numpy as np
 import ns_nested_sampling as ns
 import ns_sampling_modules as sm
+import ns_data_modules as dm
 import tensorflow as tf
 @ray.remote
 class walk():
@@ -130,7 +131,8 @@ class walk():
         # [0,21)
         # remove blanks from the sequence
         test_numpy_seq = sm.convert2numpy(df=self.test_seq, field='Ordinal')
-        random_AA = sm.remove_blanks(generator=self.g, random_AA_pos=random_AA_pos, random_AA=random_AA,
+        with dm.suppress_stdout():
+            random_AA = sm.remove_blanks(generator=self.g, random_AA_pos=random_AA_pos, random_AA=random_AA,
                                      seq=test_numpy_seq)
         # print('mutating test sequence')
         # converting to numpy for logical array manipulation
@@ -179,8 +181,8 @@ class walk():
         higher than thershold.
 
         '''
-        print('updating the sequences based on last minimum yield')
-        print('current minimum yield is  %0.2f' % min_yield)
+        # print('updating the sequences based on last minimum yield')
+        # print('current minimum yield is  %0.2f' % min_yield)
         # convert the pandas columns to numpy arrays so no for loops  :/
         test_array = sm.convert2numpy(self.test_seq)
         orginal_array =sm.convert2numpy(self.df)
@@ -207,24 +209,24 @@ class walk():
         :param idx: index of sequence with lowest yield
         :return: updates self.original_seq['Ordinal']
         '''
-        print('sequence to change %i'%self.idx)
+        # print('sequence to change %i'%self.idx)
         change_2_seq = self.idx
         while change_2_seq == self.idx:
             change_2_seq = self.g.uniform(shape=[1], minval=0, maxval=self.nb_of_sequences,  # [0,nb_of_sequences)
                                       dtype=tf.int64).numpy()[0]
-        print('new idx  %i '%change_2_seq)
+        # print('new idx  %i '%change_2_seq)
         orginal_array =sm.convert2numpy(df=self.df)
         orginal_array[self.idx, :] = orginal_array[change_2_seq, :].copy()
         # TODO : optimize in pandas to change one sequence without changing everything
         self.df['Ordinal'] = sm.convert2pandas(orginal_array)
 
         dev=sm.convert2numpy(df=self.df,field=self.yield2optimize)
-        print(dev[self.idx])
+        # print(dev[self.idx])
         dev[self.idx]=dev[change_2_seq]
         self.df[self.yield2optimize]=sm.convert2pandas(dev)
 
 
-        print(dev[self.idx])
-        print(dev[change_2_seq])
+        # print(dev[self.idx])
+        # print(dev[change_2_seq])
 
 

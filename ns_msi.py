@@ -33,7 +33,7 @@ def pull_zipped_data(c):
 def pull_output_script(job_nb):
     job_nb=str(job_nb)
     #print(password + ' scp ' + OUT_SCRIPT + job_nb + ' ' + ML_DEVELOPABILITY + '/sampling_data')
-    os_out=os.system(password +' scp ' + MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.e'+ job_nb +' ' + LOCAL_DIRECTORY + '/sampling_data')
+    os_out=os.system(password +' scp ' + MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.o'+ job_nb +' ' + LOCAL_DIRECTORY + '/sampling_data')
     if os_out == 0:
         print('sucessfully transferred file: ' +  MSI_DIRECTORY +'/ns_nested_sampling_CPU.pbs.o'+ job_nb +' to ' + LOCAL_DIRECTORY + '/sampling_data')
     else:
@@ -67,9 +67,9 @@ def pull_zipped_file(dir,filename):
 # push_scripts(['/comparisons/ray/ray_profile.py'])
 # push_scripts(['ray_profile.py'])
 # pull_zipped_file(dir='/sampling_data/comparisons/ray',filename='/ray.zip')
-# push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
+push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
 # push_scripts(['ray_for_many_cores.py'])
-pull_output_script(job_nb=22571391)
+# pull_output_script(job_nb=22571432)
 #push_scripts(['ns_walk.py'])
 # from ns_latest_runs import C
 #
