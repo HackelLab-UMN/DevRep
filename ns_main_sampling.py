@@ -49,7 +49,7 @@ if sys.platform=='darwin':
 else:
     suppress_output=True
 
-driver(c=c,suppress_output=False)
+driver(c=c,suppress_output=suppress_output)
 # sr.main(C=[c])
 
 

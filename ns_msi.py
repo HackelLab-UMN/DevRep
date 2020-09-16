@@ -57,11 +57,16 @@ def pull_zipped_file(dir,filename):
         print('sucessfully transferred file: ' + MSI_DIRECTORY +dir+filename+ ' to ' + LOCAL_DIRECTORY +dir)
     else:
         raise SystemError('error transferring file: ' + MSI_DIRECTORY +dir+filename+ ' to ' + LOCAL_DIRECTORY +dir)
+    fp = '.'+dir+filename
+    cmd='unzip -o ' + fp
+    os_out = os.system(cmd)
+    if os_out == 0:
+        print('sucessfully unzipped data for ' + fp)
 
 # push_scripts(['ns_nested_sampling_ray.py','ns_main_sampling.py'])
 # push_scripts(['/comparisons/ray/ray_profile.py'])
-push_scripts(['ray_profile.py','ns_walk.py'])
-#pull_zipped_file(dir='/sampling_data/comparisons/ray',filename='/ray.zip')
+# push_scripts(['ray_profile.py'])
+pull_zipped_file(dir='/sampling_data/comparisons/ray',filename='/ray.zip')
 #push_scripts(['ns_main_sampling.py'])
 # push_scripts(['ray_for_many_cores.py'])
 #push_scripts(['ns_walk.py'])
