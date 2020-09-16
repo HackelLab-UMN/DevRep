@@ -35,6 +35,7 @@ class nested_sampling():
         # make randomized data
         if df_filename is None:
             self.original_seq=pd.DataFrame()
+            print('making sampling data')
             self.original_seq['Ordinal']= sm.make_sampling_data(generator=self.g_parent,Nb_sequences=Nb_sequences,Nb_positions=Nb_positions)
             # self.original_seq[yield2optimize] = np.zeros(Nb_sequences)
         else:
@@ -109,7 +110,7 @@ class nested_sampling():
         # function
 
         times=pd.DataFrame()
-
+        print('starting nested sampling')
         for j in range(c.nb_loops):
             # maybe make a function called update sequence configuration, call it at start of walk every single time
             start=time.time()

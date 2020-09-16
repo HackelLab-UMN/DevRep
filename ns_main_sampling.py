@@ -47,11 +47,11 @@ def check_inputs(c):
 #          nb_cores=8)
 
 
-c=inputs(nb_loops=4,
-         nb_steps=2,
+c=inputs(nb_loops=100000,
+         nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=10,
-         nb_snapshots=4,
+         nb_snapshots=25,
          Nb_sequences=10000,
          yield2optimize='Developability',
          nb_cores=8)
