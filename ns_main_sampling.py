@@ -53,7 +53,6 @@ c=inputs(nb_loops=100000,
          nb_mutations=12,
          nb_snapshots=50,
          Nb_sequences=10000,
-         
          yield2optimize='IQ_Average_bc',
          nb_cores=8)
 #todo:
