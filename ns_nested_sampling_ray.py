@@ -108,7 +108,7 @@ class nested_sampling():
         self.nb_mutations.append(c.nb_mutations) # set the number of mutations to what is specified by inputs() object
         # todo:  the above can be updated with a parameter for the number of mutations when calling the
         # function
-
+        loops_done=[]
         times=pd.DataFrame()
         print('starting nested sampling')
         for j in range(c.nb_loops):
@@ -140,9 +140,10 @@ class nested_sampling():
                 # join all dataframes together at very end
                 # finally bring the sequences back togther if it is a loop2save, and take a snapshot.
                 # make a heatmap. Etc. zip the data. do some post processing.
+                loops_done.append(j)
                 res = ray.get([walker.get_df.remote() for walker in walkers])
                 self.original_seq = pd.concat(res).copy()
-                dm.take_snapshot(self=self, loop_nb=j, c=c,times=times)
+                dm.take_snapshot(self=self, loop_nb=j, c=c,times=times,loops_done=loops_done)
                 pm.make_heat_map(df=self.original_seq, c=c, loop_nb=j)
                 dm.zip_data(c=c)
 
@@ -164,9 +165,9 @@ class nested_sampling():
         elif c.mutation_type is 'dynamic':
             # find current percent positive and percent positive before that.
             last_pp = self.percent_pos[-1]
-            if last_pp < 20 and self.nb_mutations[-1] > 1: # bug here this was zero before... dont make that mistake again...
+            if last_pp < .20 and self.nb_mutations[-1] > 1: # bug here this was zero before... dont make that mistake again...
                 self.nb_mutations.append(self.nb_mutations[-1] - 1)
-            elif (last_pp > 20 and last_pp < 30) or self.nb_mutations[-1]>=16: # shouldn't have more than 16 unique mutations
+            elif (last_pp > .20 and last_pp < .30) or self.nb_mutations[-1]>=16: # shouldn't have more than 16 unique mutations
                 self.nb_mutations.append(self.nb_mutations[-1])
             else:
                 self.nb_mutations.append(self.nb_mutations[-1] + 1)

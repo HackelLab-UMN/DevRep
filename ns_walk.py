@@ -2,7 +2,7 @@ import ray
 import ns_submodels_module as ns_mb
 import os,sys
 import numpy as np
-import ns_nested_sampling as ns
+# import ns_nested_sampling as ns
 import ns_sampling_modules as sm
 import ns_data_modules as dm
 import tensorflow as tf
@@ -10,7 +10,6 @@ import tensorflow as tf
 class walk():
     def __init__(self, df=None,nb_steps=5, yield2optimize='Developability',profile=False):
         '''
-
         walk class for doing random walks across multiple cpus
         :param df: input
         '''

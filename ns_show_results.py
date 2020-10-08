@@ -21,6 +21,7 @@ def violin_loop_plots(c,loops_2_show=None,nb_strings=None):
     :param nb_strings: number of strings to have in the violin plot  [default: 6]
     :return: saves the violin plot
     '''
+    print('making violin plots')
     if loops_2_show is None:
         loops_done=dm.read_pickle(c=c,file_description=fn.loops_done_fn)
         loops_2_show=sm.convert2numpy(df=loops_done,field=fn.loops_done_fn)+1
@@ -31,6 +32,9 @@ def violin_loop_plots(c,loops_2_show=None,nb_strings=None):
         if step == 0:
             step=1
         loops_2_show=loops_2_show[::step]
+        completed=sm.convert2numpy(df=loops_done,field=fn.loops_done_fn)+1
+        if not (np.max(completed) in loops_2_show):
+            loops_2_show=np.hstack((loops_2_show,np.array([np.max(completed)])))
 
     pm.violin_saved_dataset(c=c,loops_2_show=loops_2_show)
 
@@ -165,6 +169,8 @@ def main(C):
     :param C: a list of inputs() objects
     :return:
     '''
+    # l2s=[np.array([0,12000,24000,36000,44000])+1,np.array([0,6000,12000,18000])+1,np.array([0,12000,24000,36000,48000,60000,68000])+1,np.array([0,12000,24000,36000,48000,60000])+1]
+
     for c in C:
         violin_loop_plots(c=c)
         gif_make(c=c)
@@ -175,5 +181,21 @@ def main(C):
         pm.twinAxisvsLoops(c=c,fields2show=[fn.pp_fn,fn.nb_mutation_fn])
         dm.zip_data(c=c)
 
+
+        # df=dm.read_pickle(c,'times')
+        # print(sm.convert2numpy(df,'times')[::5])
+        # sm.convert2numpy(df=df,field='times')
+
 # from ns_latest_runs import C
-# main(C)
+if __name__=='__main__':
+
+    C=[inputs(nb_loops=20,
+         nb_steps=5,
+         mutation_type='dynamic',
+         nb_mutations=10,
+         nb_snapshots=10,
+         Nb_sequences=10000,
+         yield2optimize='Developability',
+         nb_cores=8)]
+
+    main(C)

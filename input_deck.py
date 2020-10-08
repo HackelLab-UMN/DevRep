@@ -17,6 +17,7 @@ class inputs():
         :param Nb_sequences: Number of sequences in a run
     `   :param yield2optimize: which yield to optimize shuffle('SH_Average_bc'), iq('IQ_Average_bc') , or sum of both ('Developability')
         :param nb_cores: number of cores to specify for this job
+
         '''
 
         #just make all the rest of the parameters besides nb_sequences

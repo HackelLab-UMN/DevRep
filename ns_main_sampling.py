@@ -50,12 +50,11 @@ def check_inputs(c):
 c=inputs(nb_loops=100000,
          nb_steps=5,
          mutation_type='dynamic',
-         nb_mutations=10,
-         nb_snapshots=25,
+         nb_mutations=12,
+         nb_snapshots=50,
          Nb_sequences=10000,
-         yield2optimize='IQ_Average_bc',
+         yield2optimize='Developability',
          nb_cores=8)
-
 #todo:
 # find a way to get the number of cores on a numa node
 # stop output from cores so their is no core files in your directories.
@@ -65,7 +64,7 @@ if sys.platform=='darwin':
 else:
     suppress_output=True
 
-driver(c=c,suppress_output=False)
+driver(c=c,suppress_output=True)
 # sr.main(C=[c])
 
 

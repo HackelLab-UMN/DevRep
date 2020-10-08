@@ -17,6 +17,19 @@ in the main directory under main*example.py. Beyond unzipping the datasets, thes
 
 For non-top performing models, saved hyperparameter trials and model stats can be found within the zipped folder in the repective folders
 
+
+To create the environment with the conda package manager run from the command line
+
+`conda create --name <env>  python=3.7.5 tensorflow=2.0.0 numpy=1.17.4 pandas=0.25.3 seaborn=0.10.1 scikit-learn=0.22 matplotlib`
+
+Where `<env>` is your environment name. Then from the commmand line type: 
+
+`conda activate <env>`
+
+`conda install -c conda-forge hyperopt=0.2.2` 
+
+The environment for DevRep is now setup!
+
 File descriptions:
 model_module.py - base model class that defines how to cross-validate, test, and evaluate model performances.
 submodels_module.py - subclasses that modify the model inputs/outputs and datasets for model evlaulation
@@ -34,4 +47,5 @@ Folder descriptions:
 /models/ - location of saved models as either pickeled scikit-learn models or tensorflow2 weights
 /plotpairs/ - location of saved pairs of (predicted value, true value, strain or assay id)
 /figures/ - location of the saved predicted figures for cv and testing
+
 

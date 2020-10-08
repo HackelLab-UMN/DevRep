@@ -5,6 +5,15 @@ pertain to nested sampling files.
 
 As of right now only doing single mutations. Also no parrelizations. 
 
+# Environment Setup 
+Type the following commands with environment for DevRep activated. Here `<env>` 
+is the name of your environment
+
+`conda activate <env>`
+
+`pip install ray==1.0.0`
+
+
 # Set up
 
 1. if not done already, make local conda environment as specified by `/DevRep/conda_package_list.txt`, 

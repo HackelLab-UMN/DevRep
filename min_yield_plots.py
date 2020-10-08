@@ -10,8 +10,6 @@ from input_deck import names
 n=names()
 
 
-
-
 def comparisons(C,field2Show):
     '''
 

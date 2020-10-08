@@ -43,7 +43,7 @@ def violin_saved_dataset(c,loops_2_show,y_lim=None):
         n=loops_2_show[k]
 
         df=dm.read_pickle(c=c,file_description='sequences_loop_'+str(loops_2_show[k]))
-        dev=sm.convert2numpy(df=df,field='Developability')
+        dev=sm.convert2numpy(df=df,field=c.yield2optimize)
         violin_parts =ax.violinplot([dev], positions=[k], showmedians=False,
                                                        showextrema=False, points=100,
                                                        widths=.9)
@@ -276,7 +276,7 @@ def twinAxisvsLoops(c,fields2show):
     color = 'tab:red'
     ax1.set_xlabel('loop nb')
     ax1.set_ylabel(fields2show[1], color=color)
-    ax1.plot(loop_range, nb[0:-2], color=color)
+    ax1.plot(loop_range, nb[0:-1], color=color)
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()

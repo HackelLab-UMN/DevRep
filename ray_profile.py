@@ -7,10 +7,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-import sys,os
+import os
 import ns_walk as nw
 import sys
-
+from ray.util import ActorPool
 import ns_data_modules as dm
 nproc=np.arange(16,72,8)
 sequence=np.arange(20000,200000,20000)
@@ -48,7 +48,7 @@ for n in nproc:
         inputs = sm.splitPandas(df=df, nb_splits=n)
         # for the walkers already initilized:  just change the dataframe
 
-        ray.get([walker.set_df.remote(i) for walker,i in zip(walkers[0:n],inputs)])
+        ac=ray.get([walker.set_df.remote(i) for walker,i in zip(walkers[0:n],inputs)])
 
         # for walkers not already initilzed. add new ones!!
         # find the initial yield, return the min yield from each worker
@@ -57,9 +57,10 @@ for n in nproc:
         res=ray.get([walker.init_yield.remote() for walker in walkers[0:n]])
         min_yield=[np.min(res)]
         start = time.time()
-
+        pool= ActorPool(ac)
         with dm.suppress_stdout():
-            res=ray.get([walker.walk.remote(min_yield[0],nb_mutations) for walker in walkers[0:n]])
+            # res=ray.get(pool.map(lambda a,v: a.walk.remote(min_yield[0],nb_mutations)))
+            # res=ray.get([walker.walk.remote(min_yield[0],nb_mutations) for walker in walkers[0:n]])
         t.append((time.time()-start)/nb_steps)
 
         # [walker.reset() for walker in walkers]
@@ -76,7 +77,7 @@ plt.legend()
 plt.title('profiling with ray:nb mutations %i,steps: %i'%(nb_mutations,nb_steps))
 plt.xlabel('number of sequences')
 plt.ylabel('number of seconds per step')
-plt.savefig('./sampling_data/comparisons/ray/%s_profile_maxs_%i_maxn_%i_stepavg_%i.png'%(sys.platform,np.max(nproc),np.max(sequence),nb_steps))
+plt.savefig('./sampling_data/comparisons/ray/pool_%s_profile_maxs_%i_maxn_%i_stepavg_%i.png'%(sys.platform,np.max(nproc),np.max(sequence),nb_steps))
 dm.zip_directory(dir_name='comparisons/ray',zip_filename='ray')
 
 
