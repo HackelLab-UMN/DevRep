@@ -47,14 +47,14 @@ def check_inputs(c):
 #          nb_cores=8)
 
 
-c=inputs(nb_loops=100000,
+c=inputs(nb_loops=50000,
          nb_steps=5,
          mutation_type='dynamic',
          nb_mutations=12,
          nb_snapshots=50,
-         Nb_sequences=10000,
-         yield2optimize='IQ_Average_bc',
-         nb_cores=8)
+         Nb_sequences=100000,
+         yield2optimize='Developability',
+         nb_cores=32)
 #todo:
 # find a way to get the number of cores on a numa node
 # stop output from cores so their is no core files in your directories.
