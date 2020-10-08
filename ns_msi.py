@@ -63,6 +63,10 @@ def pull_zipped_file(dir,filename):
     if os_out == 0:
         print('sucessfully unzipped data for ' + fp)
 
+def pull_latest_runs():
+    from ns_latest_runs import C
+    for c in C:
+        pull_zipped_data(c=c)
 # push_scripts(['ns_nested_sampling_ray.py','ns_main_sampling.py'])
 # push_scripts(['/comparisons/ray/ray_profile.py'])
 # push_scripts(['ray_profile.py'])
@@ -71,8 +75,10 @@ def pull_zipped_file(dir,filename):
 # push_scripts(['ray_for_many_cores.py'])
 # pull_output_script(job_nb=22571432)
 #push_scripts(['ns_walk.py'])
-from ns_latest_runs import C
-pull_zipped_data(c=C[-1])
+
+if __name__=='__main__':
+    push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
+
 # c=inputs(nb_loops=25,
 #          nb_steps=5,
 #          mutation_type='dynamic',
