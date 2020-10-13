@@ -62,13 +62,13 @@ class getyield_df():
 		self.seqs=seqs
 
 	def par_test(self):
-		start=time.time()
+		# start=time.time()
 		embeddings = self.s2e.predict(self.seqs)
 		emb_iq = [np.concatenate([x, [1, 0]]) for x in embeddings]
 		yield_iq = self.e2y.predict(emb_iq)
 		emb_sh = [np.concatenate([x, [0, 1]]) for x in embeddings]
 		yield_sh = self.e2y.predict(emb_sh)
-		print('compute time ray normal: %f'%(time.time()-start))
+		# print('compute time ray normal: %f'%(time.time()-start))
 		return [yield_iq+yield_sh]
 
 def par_test_multiprocessing(e2y,seqs):
@@ -133,32 +133,32 @@ def main():
 	ray.init(ignore_reinit_error=True)
 
 	# init the pool
-	# sample_seq_list = make_data(splits=100,n=5000)
-	# init_pool=[getyield.remote(e2y_model) for _ in range(8)]
-	# # # make an actor pool
-	# pool = ActorPool(init_pool)
-	# # # inputs in the the actor pool an anomyous function (like runge kunta in matlab)
-	# # # a is the actor v is the input of the data
-	# # sample_seq_list_id=ray.put(sample_seq_list)
-	# res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
-	# print(list(res))
-	# print('doing actor pool')
-	# p=[]
-	# for i in range(5):
-	# 	start = time.time()
-	# 	res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
-	# 	a=list(res)
-	# 	p.append(time.time() - start)
-	# 	print('actor pool: %i ,%f'%(i,p[-1]))
+	sample_seq_list = make_data(splits=100,n=5000)
+	init_pool=[getyield.remote(e2y_model) for _ in range(64)]
+	# # make an actor pool
+	pool = ActorPool(init_pool)
+	# # inputs in the the actor pool an anomyous function (like runge kunta in matlab)
+	# # a is the actor v is the input of the data
+	# sample_seq_list_id=ray.put(sample_seq_list)
+	res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
+	print(list(res))
+	print('doing actor pool')
+	p=[]
+	for i in range(5):
+		start = time.time()
+		res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
+		a=list(res)
+		p.append(time.time() - start)
+		print('actor pool: %i ,%f'%(i,p[-1]))
 	#
 
 
 
 	print('doing ray normal')
 	E=[]
-	# ray.shutdown()
-	# ray.init()
-	sample_seq_list = make_data(splits=32,n=12500)
+	ray.shutdown()
+	ray.init()
+	sample_seq_list = make_data(splits=64,n=8000)
 	inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
 	ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
 	for i in range(5):
@@ -171,24 +171,24 @@ def main():
 	# ray takes care of pointers in memory , so that we dont have to
 	ray.shutdown()
 
-	# m=[]
-	# print('multiprocessing')
-	# sample_seq_list=make_data(splits=50,n=10000)
-	# pool = multiprocessing.Pool(processes=8)
-	# # for _ in range(5):
+	m=[]
+	print('multiprocessing')
+	sample_seq_list=make_data(splits=50,n=10000)
+	pool = multiprocessing.Pool(processes=64)
 	# for _ in range(5):
-	# 	print(i)
-	# 	start = time.time()
-	# 	(out)=pool.map(filled,sample_seq_list)
-	# 	yields=np.concatenate(out)
-	# 	yields=yields.flatten()
-	# 	end = time.time()
-	# 	m.append(end-start)
-	# 	print('multiprocessing total: %f'%m[-1])
+	for _ in range(5):
+		print(i)
+		start = time.time()
+		(out)=pool.map(filled,sample_seq_list)
+		yields=np.concatenate(out)
+		yields=yields.flatten()
+		end = time.time()
+		m.append(end-start)
+		print('multiprocessing total: %f'%m[-1])
 
-	# print('ray pool : %f +/- %f' %(np.mean(p),np.std(p)))
+	print('ray pool : %f +/- %f' %(np.mean(p),np.std(p)))
 	print('ray normal: %f +/- %f' %(np.mean(E),np.std(E)))
-	# print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
+	print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
 
 
 if __name__ == '__main__':
