@@ -129,8 +129,8 @@ def main():
 	# end =time.time()-start
 	# print('serial: %f'%end)
 
-	# if ray.is_initialized() is True:
-	# 	ray.shutdown()
+	if ray.is_initialized() is True:
+		ray.shutdown()
 	# ray.init(ignore_reinit_error=True)
 	#
 	# # init the pool
@@ -154,22 +154,23 @@ def main():
 	# #
 	#
 	#
-	# print('doing ray normal')
-	# E=[]
 	# ray.shutdown()
 	# ray.init()
-	# sample_seq_list = make_data(splits=32,n=8000)
-	# inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
-	# ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
-	# for i in range(5):
-	# 	start = time.time()
-	# 	res = ray.get([actor.par_test.remote() for actor in inits])
-	# 	E.append(time.time() - start)
-	# 	print('normal ray: %f'%E[-1])
-	# #evaluate yields in parallel
-	# # make actor pool once, load the state of the two models.
-	# # ray takes care of pointers in memory , so that we dont have to
-	# ray.shutdown()
+
+	print('doing ray normal')
+	E = []
+	sample_seq_list = make_data(splits=32,n=3125)
+	inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
+	ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
+	for i in range(5):
+		start = time.time()
+		res = ray.get([actor.par_test.remote() for actor in inits])
+		E.append(time.time() - start)
+		print('normal ray: %f'%E[-1])
+	#evaluate yields in parallel
+	# make actor pool once, load the state of the two models.
+	# ray takes care of pointers in memory , so that we dont have to
+	ray.shutdown()
 
 	m=[]
 	print('multiprocessing')
