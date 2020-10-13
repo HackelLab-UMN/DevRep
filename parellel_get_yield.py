@@ -129,66 +129,66 @@ def main():
 	# end =time.time()-start
 	# print('serial: %f'%end)
 
-	if ray.is_initialized() is True:
-		ray.shutdown()
-	ray.init(ignore_reinit_error=True)
-
-	# init the pool
-	sample_seq_list = make_data(splits=50,n=10000)
-	init_pool=[getyield.remote(e2y_model) for _ in range(32)]
-	# # make an actor pool
-	pool = ActorPool(init_pool)
-	# # inputs in the the actor pool an anomyous function (like runge kunta in matlab)
-	# # a is the actor v is the input of the data
-	# sample_seq_list_id=ray.put(sample_seq_list)
-	res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
-	print(list(res))
-	print('doing actor pool')
-	p=[]
-	for i in range(5):
-		start = time.time()
-		res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
-		a=list(res)
-		p.append(time.time() - start)
-		print('actor pool: %i ,%f'%(i,p[-1]))
+	# if ray.is_initialized() is True:
+	# 	ray.shutdown()
+	# ray.init(ignore_reinit_error=True)
 	#
-
-
-	print('doing ray normal')
-	E=[]
-	ray.shutdown()
-	ray.init()
-	sample_seq_list = make_data(splits=32,n=8000)
-	inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
-	ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
-	for i in range(5):
-		start = time.time()
-		res = ray.get([actor.par_test.remote() for actor in inits])
-		E.append(time.time() - start)
-		print('normal ray: %f'%E[-1])
-	#evaluate yields in parallel
-	# make actor pool once, load the state of the two models.
-	# ray takes care of pointers in memory , so that we dont have to
-	ray.shutdown()
-
-	# m=[]
-	# print('multiprocessing')
-	# sample_seq_list=make_data(splits=50,n=10000)
-	# pool = multiprocessing.Pool(processes=32)
-	# # for _ in range(5):
-	# for _ in range(5):
-	# 	print(i)
+	# # init the pool
+	# sample_seq_list = make_data(splits=50,n=10000)
+	# init_pool=[getyield.remote(e2y_model) for _ in range(32)]
+	# # # make an actor pool
+	# pool = ActorPool(init_pool)
+	# # # inputs in the the actor pool an anomyous function (like runge kunta in matlab)
+	# # # a is the actor v is the input of the data
+	# # sample_seq_list_id=ray.put(sample_seq_list)
+	# res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
+	# print(list(res))
+	# print('doing actor pool')
+	# p=[]
+	# for i in range(5):
 	# 	start = time.time()
-	# 	(out)=pool.map(filled,sample_seq_list)
-	# 	yields=np.concatenate(out)
-	# 	yields=yields.flatten()
-	# 	end = time.time()
-	# 	m.append(end-start)
-	# 	print('multiprocessing total: %f'%m[-1])
+	# 	res = pool.map_unordered(lambda actor, value: actor.par_test.remote(value), values=sample_seq_list)
+	# 	a=list(res)
+	# 	p.append(time.time() - start)
+	# 	print('actor pool: %i ,%f'%(i,p[-1]))
+	# #
+	#
+	#
+	# print('doing ray normal')
+	# E=[]
+	# ray.shutdown()
+	# ray.init()
+	# sample_seq_list = make_data(splits=32,n=8000)
+	# inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
+	# ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
+	# for i in range(5):
+	# 	start = time.time()
+	# 	res = ray.get([actor.par_test.remote() for actor in inits])
+	# 	E.append(time.time() - start)
+	# 	print('normal ray: %f'%E[-1])
+	# #evaluate yields in parallel
+	# # make actor pool once, load the state of the two models.
+	# # ray takes care of pointers in memory , so that we dont have to
+	# ray.shutdown()
 
-	print('ray pool : %f +/- %f' %(np.mean(p),np.std(p)))
-	print('ray normal: %f +/- %f' %(np.mean(E),np.std(E)))
-	# print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
+	m=[]
+	print('multiprocessing')
+	sample_seq_list=make_data(splits=50,n=10000)
+	pool = multiprocessing.Pool(processes=32)
+	# for _ in range(5):
+	for i in range(5):
+		print(i)
+		start = time.time()
+		(out)=pool.map(filled,sample_seq_list)
+		yields=np.concatenate(out)
+		yields=yields.flatten()
+		end = time.time()
+		m.append(end-start)
+		print('multiprocessing total: %f'%m[-1])
+
+	# print('ray pool : %f +/- %f' %(np.mean(p),np.std(p)))
+	# print('ray normal: %f +/- %f' %(np.mean(E),np.std(E)))
+	print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
 
 
 if __name__ == '__main__':

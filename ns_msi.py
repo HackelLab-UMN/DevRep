@@ -77,7 +77,8 @@ def pull_latest_runs():
 #push_scripts(['ns_walk.py'])
 
 if __name__=='__main__':
-    push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
+    # push_scripts(['ns_main_sampling.py','ns_nested_sampling_CPU.pbs'])
+    pull_latest_runs()
 
 # c=inputs(nb_loops=25,
 #          nb_steps=5,

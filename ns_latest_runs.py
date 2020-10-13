@@ -15,7 +15,7 @@ C=[   inputs(nb_loops=100000,
          nb_snapshots=50,
          Nb_sequences=100000,
          yield2optimize='Developability',
-         nb_cores=32),
+         nb_cores=32), # 22752711
 inputs(nb_loops=100000,
          nb_steps=5,
          mutation_type='dynamic',

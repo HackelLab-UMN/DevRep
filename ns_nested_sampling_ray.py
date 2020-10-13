@@ -101,6 +101,8 @@ class nested_sampling():
 
         print('init yield')
         # find the initial yield, return the min yield from each worker
+
+
         res=ray.get([walker.init_yield.remote() for walker in walkers])
         print('got yields from everyone')
         self.min_yield.append(np.min(res))

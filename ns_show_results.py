@@ -166,7 +166,8 @@ def cys_stuff(c):
 def main(C):
     '''
     main function to run for ns_show_results
-    :param C: a list of inputs() objects
+    :param C: a list of inputs() objects, preferable those from
+    ns_latest_runs.py
     :return:
     '''
     # l2s=[np.array([0,12000,24000,36000,44000])+1,np.array([0,6000,12000,18000])+1,np.array([0,12000,24000,36000,48000,60000,68000])+1,np.array([0,12000,24000,36000,48000,60000])+1]
@@ -189,13 +190,5 @@ def main(C):
 # from ns_latest_runs import C
 if __name__=='__main__':
 
-    C=[inputs(nb_loops=20,
-         nb_steps=5,
-         mutation_type='dynamic',
-         nb_mutations=10,
-         nb_snapshots=10,
-         Nb_sequences=10000,
-         yield2optimize='Developability',
-         nb_cores=8)]
-
+    from ns_latest_runs import C
     main(C)

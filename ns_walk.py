@@ -6,6 +6,7 @@ import numpy as np
 import ns_sampling_modules as sm
 import ns_data_modules as dm
 import tensorflow as tf
+import time
 @ray.remote
 class walk():
     def __init__(self, df=None,nb_steps=5, yield2optimize='Developability',profile=False):
@@ -23,12 +24,14 @@ class walk():
         s2a_params = [[1, 8, 10], 'emb_cnn', 1]
 
         # tensorflow model
+        start=time.time()
         self.s2a = ns_mb.ns_seq_to_assay_model(s2a_params)
         self.s2a.init_sequence_embeddings()
         # todo:  is to put these two objects in the memory store
         self.e2y = ns_mb.ns_sequence_embeding_to_yield_model(s2a_params + [0], e2y_params)
         self.e2y.init_e2y_model()
-
+        end =time.time()-start
+        print(end)
         # set df to none if none specified
         self.df = df
 
@@ -58,7 +61,6 @@ class walk():
 
         self.nb_steps=nb_steps
         self.idx=None
-
         # ray optimizer
        # os.environ["OMP_NUM_THREADS"] = str(os.cpu_count())
 
@@ -104,6 +106,9 @@ class walk():
             self.rng.shuffle(s)
             # if np.unique(s).shape[0] != 16:
             #     raise SyntaxError
+
+
+
         S = S[:, 0:nb_mutations].copy()
 
         for random_AA_pos in S.T:
@@ -121,11 +126,13 @@ class walk():
         # for a mutation to occur ;
         # pseudo random number
         # generate a pseudo random number to define which AA to change [0-15]
+
         if random_AA_pos is None:
             random_AA_pos = self.g.uniform(shape=[self.nb_of_sequences], minval=0, maxval=16,
                                            dtype=tf.int64).numpy()  # [0,16)
         # generate a pseudo random number to define which AA to change to [0-20]
         # using the same generator might be problematic
+
         random_AA = self.g.uniform(shape=[self.nb_of_sequences], minval=0, maxval=21, dtype=tf.int64).numpy()
         # [0,21)
         # remove blanks from the sequence

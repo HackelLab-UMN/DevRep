@@ -13,11 +13,12 @@ import sys
 from ray.util import ActorPool
 import ns_data_modules as dm
 nproc=np.arange(16,72,8)
+nproc=[8]
 sequence=np.arange(20000,200000,20000)
 
 # nproc=np.arange(3,9,2)
 # sequence=np.arange(5000,20000,5000)
-cpus=64
+cpus=8
 
 
 
@@ -60,12 +61,10 @@ for n in nproc:
         pool= ActorPool(ac)
         with dm.suppress_stdout():
             # res=ray.get(pool.map(lambda a,v: a.walk.remote(min_yield[0],nb_mutations)))
-            # res=ray.get([walker.walk.remote(min_yield[0],nb_mutations) for walker in walkers[0:n]])
+            res=ray.get([walker.walk.remote(min_yield[0],nb_mutations) for walker in walkers[0:n]])
         t.append((time.time()-start)/nb_steps)
 
         # [walker.reset() for walker in walkers]
-
-
 
     # save states of those processor numbers
     # include standard of deviation
