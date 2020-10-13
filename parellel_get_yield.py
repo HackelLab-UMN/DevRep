@@ -8,6 +8,7 @@ import time
 # import ray.util.multiprocessing.pool
 from ray.util import ActorPool
 import ray
+import tensorflow as tf
 
 def build_new_model():
 	'transfers weight from old model to new model'
@@ -37,7 +38,7 @@ def build_new_model():
 @ray.remote
 class getyield():
 	def __init__(self,e2y):
-		import tensorflow as tf
+		# import tensorflow as tf
 		tf.config.optimizer.set_jit(True)
 		self.s2e = tf.keras.models.load_model('best_emb_model')
 		self.e2y=e2y
@@ -55,7 +56,7 @@ class getyield():
 @ray.remote
 class getyield_df():
 	def __init__(self,e2y,seqs):
-		import tensorflow as tf
+		# import tensorflow as tf
 		tf.config.optimizer.set_jit(True)
 		self.s2e = tf.keras.models.load_model('best_emb_model')
 		self.e2y=e2y
@@ -133,7 +134,7 @@ def main():
 	ray.init(ignore_reinit_error=True)
 
 	# init the pool
-	sample_seq_list = make_data(splits=100,n=5000)
+	sample_seq_list = make_data(splits=50,n=10000)
 	init_pool=[getyield.remote(e2y_model) for _ in range(32)]
 	# # make an actor pool
 	pool = ActorPool(init_pool)
@@ -170,24 +171,24 @@ def main():
 	# ray takes care of pointers in memory , so that we dont have to
 	ray.shutdown()
 
-	m=[]
-	print('multiprocessing')
-	sample_seq_list=make_data(splits=50,n=10000)
-	pool = multiprocessing.Pool(processes=32)
+	# m=[]
+	# print('multiprocessing')
+	# sample_seq_list=make_data(splits=50,n=10000)
+	# pool = multiprocessing.Pool(processes=32)
+	# # for _ in range(5):
 	# for _ in range(5):
-	for _ in range(5):
-		print(i)
-		start = time.time()
-		(out)=pool.map(filled,sample_seq_list)
-		yields=np.concatenate(out)
-		yields=yields.flatten()
-		end = time.time()
-		m.append(end-start)
-		print('multiprocessing total: %f'%m[-1])
+	# 	print(i)
+	# 	start = time.time()
+	# 	(out)=pool.map(filled,sample_seq_list)
+	# 	yields=np.concatenate(out)
+	# 	yields=yields.flatten()
+	# 	end = time.time()
+	# 	m.append(end-start)
+	# 	print('multiprocessing total: %f'%m[-1])
 
 	print('ray pool : %f +/- %f' %(np.mean(p),np.std(p)))
 	print('ray normal: %f +/- %f' %(np.mean(E),np.std(E)))
-	print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
+	# print('multiprocessing.pool: %f +/- %f'%(np.mean(m),np.std(m)))
 
 
 if __name__ == '__main__':
