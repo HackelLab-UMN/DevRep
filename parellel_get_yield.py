@@ -173,7 +173,7 @@ def main():
 
 	m=[]
 	print('multiprocessing')
-	sample_seq_list=make_data(splits=200,n=10000)
+	sample_seq_list=make_data(splits=100,n=1000)
 	pool = multiprocessing.Pool(processes=64)
 	# for _ in range(5):
 	for i in range(5):
