@@ -134,7 +134,7 @@ def main():
 
 	# init the pool
 	sample_seq_list = make_data(splits=100,n=5000)
-	init_pool=[getyield.remote(e2y_model) for _ in range(64)]
+	init_pool=[getyield.remote(e2y_model) for _ in range(32)]
 	# # make an actor pool
 	pool = ActorPool(init_pool)
 	# # inputs in the the actor pool an anomyous function (like runge kunta in matlab)
@@ -153,12 +153,11 @@ def main():
 	#
 
 
-
 	print('doing ray normal')
 	E=[]
 	ray.shutdown()
 	ray.init()
-	sample_seq_list = make_data(splits=64,n=8000)
+	sample_seq_list = make_data(splits=32,n=8000)
 	inits = [getyield_df.remote(e2y_model, data) for data in sample_seq_list]
 	ray.get([actor.par_test.remote() for actor in inits]) # ray always runs super slow the first time so ignore.
 	for i in range(5):
@@ -174,7 +173,7 @@ def main():
 	m=[]
 	print('multiprocessing')
 	sample_seq_list=make_data(splits=50,n=10000)
-	pool = multiprocessing.Pool(processes=64)
+	pool = multiprocessing.Pool(processes=32)
 	# for _ in range(5):
 	for _ in range(5):
 		print(i)
