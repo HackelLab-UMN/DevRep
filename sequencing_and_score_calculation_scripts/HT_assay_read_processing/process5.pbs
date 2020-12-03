@@ -1,0 +1,20 @@
+#!/bin/bash -l
+#PBS -l walltime=1:00:00,nodes=1:ppn=10,mem=10gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+module load usearch/11.0_64bit
+cd ./round3_gp2/nova2/
+
+
+for ((i=1;i<=3;i++));
+do
+	for ((j=1;j<=40;j=j+4));
+	do
+		usearch -otutab_merge "./Trial_"$i"/RPI"$j"_otutab.txt,./Trial_"$i"/RPI"$((j+1))"_otutab.txt,./Trial_"$i"/RPI"$((j+2))"_otutab.txt,./Trial_"$i"/RPI"$((j+3))"_otutab.txt" -output "./Trial_"$i"/RPI"$j"-"$((j+3))"_otutab.txt"
+	done
+	usearch -otutab_merge "./Trial_"$i"/RPI1-4_otutab.txt","./Trial_"$i"/RPI5-8_otutab.txt","./Trial_"$i"/RPI9-12_otutab.txt","./Trial_"$i"/RPI13-16_otutab.txt","./Trial_"$i"/RPI17-20_otutab.txt" -output "./Trial_"$i"/RPI1-20_otutab.txt"
+	usearch -otutab_merge "./Trial_"$i"/RPI21-24_otutab.txt","./Trial_"$i"/RPI25-28_otutab.txt","./Trial_"$i"/RPI29-32_otutab.txt","./Trial_"$i"/RPI33-36_otutab.txt","./Trial_"$i"/RPI37-40_otutab.txt" -output "./Trial_"$i"/RPI21-40_otutab.txt"
+	usearch -otutab_merge "./Trial_"$i"/RPI1-20_otutab.txt","./Trial_"$i"/RPI21-40_otutab.txt" -output "./Trial_"$i"/RPI1-40_otutab.txt"
+done

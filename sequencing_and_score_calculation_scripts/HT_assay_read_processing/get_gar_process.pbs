@@ -1,0 +1,31 @@
+#!/bin/bash -l
+#PBS -l walltime=24:00:00,nodes=1:ppn=10,mem=20gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+cd ./round3_gp2/nova2/zotu_otu_info/
+i=$PBS_ARRAYID
+
+
+for ((i=1;i<=40;i++));
+do
+	./usearch32.exe	 -otutab "../Trial_1/RPI"$i"_Unique.fasta" -zotus gar.fasta -otutabout "../Trial_1/RPI"$i"_otutab_gar.txt" -threads 10
+	./usearch32.exe	 -otutab "../Trial_2/RPI"$i"_Unique.fasta" -zotus gar.fasta -otutabout "../Trial_2/RPI"$i"_otutab_gar.txt" -threads 10
+	./usearch32.exe	 -otutab "../Trial_3/RPI"$i"_Unique.fasta" -zotus gar.fasta -otutabout "../Trial_3/RPI"$i"_otutab_gar.txt" -threads 10
+done
+
+for ((i=1;i<=3;i++));
+do
+	for ((j=1;j<=40;j=j+4));
+	do
+		./usearch32.exe -otutab_merge "../Trial_"$i"/RPI"$j"_otutab_gar.txt,../Trial_"$i"/RPI"$((j+1))"_otutab_gar.txt,../Trial_"$i"/RPI"$((j+2))"_otutab_gar.txt,../Trial_"$i"/RPI"$((j+3))"_otutab_gar.txt" -output "../Trial_"$i"/RPI"$j"-"$((j+3))"_otutab_gar.txt"
+	done
+
+./usearch32.exe -otutab_merge "../Trial_"$i"/RPI1-4_otutab_gar.txt","../Trial_"$i"/RPI5-8_otutab_gar.txt","../Trial_"$i"/RPI9-12_otutab_gar.txt","../Trial_"$i"/RPI13-16_otutab_gar.txt","../Trial_"$i"/RPI17-20_otutab_gar.txt" -output "../Trial_"$i"/RPI1-20_otutab_gar.txt"
+./usearch32.exe -otutab_merge "../Trial_"$i"/RPI21-24_otutab_gar.txt","../Trial_"$i"/RPI25-28_otutab_gar.txt","../Trial_"$i"/RPI29-32_otutab_gar.txt","../Trial_"$i"/RPI33-36_otutab_gar.txt","../Trial_"$i"/RPI37-40_otutab_gar.txt" -output "../Trial_"$i"/RPI21-40_otutab_gar.txt"
+./usearch32.exe -otutab_merge "../Trial_"$i"/RPI1-20_otutab_gar.txt","../Trial_"$i"/RPI21-40_otutab_gar.txt" -output "../Trial_"$i"/RPI1-40_otutab_gar.txt"
+done
+
+
+

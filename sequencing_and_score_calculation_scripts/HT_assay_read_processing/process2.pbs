@@ -1,0 +1,34 @@
+#!/bin/bash -l
+#PBS -l walltime=24:00:00,nodes=1:ppn=24,mem=250gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+module load usearch/11.0_64bit
+cd ./round3_gp2/nova2/
+
+#cat "./Trial_1/RPI"*"_filter.fasta" > trial_1_filter.fasta
+#cat "./Trial_2/RPI"*"_filter.fasta" > trial_2_filter.fasta
+#cat "./Trial_3/RPI"*"_filter.fasta" > trial_3_filter.fasta
+
+#usearch -fastx_uniques trial_1_filter.fasta -fastaout trial_1_unique.fasta -sizeout -relabel Uniq1
+#usearch -fastx_uniques trial_2_filter.fasta -fastaout trial_2_unique.fasta -sizeout -relabel Uniq2
+#usearch -fastx_uniques trial_3_filter.fasta -fastaout trial_3_unique.fasta -sizeout -relabel Uniq3
+
+#usearch -unoise3 trial_2_unique.fasta -zotus zotus_trial_2.fasta -minsize 50
+#usearch -unoise3 trial_3_unique.fasta -zotus zotus_trial_3.fasta -minsize 50
+usearch -unoise3 trial_1_unique.fasta -zotus zotus_trial_1.fasta -minsize 100
+
+cat zotus_trial_1.fasta zotus_trial_2.fasta zotus_trial_3.fasta > zotus_trial_123.fasta 
+
+usearch -fastx_uniques zotus_trial_123.fasta -fastaout zotus_final.fasta -relabel Zotu -minuniquesize 3
+usearch -fastx_uniques zotus_trial_123.fasta -fastaout zotus_count.fasta -relabel Zotu -sizeout
+
+
+usearch -usearch_global zotus_final.fasta -db Gp2_part_1.fasta -strand plus -id 1.0 -matched zotus_final1.fasta
+usearch -usearch_global zotus_final1.fasta -db Gp2_part_2.fasta -strand plus -id 1.0 -matched zotus_final12.fasta
+usearch -usearch_global zotus_final12.fasta -db Gp2_part_3.fasta -strand plus -id 1.0 -matched zotus_match.fasta
+
+
+
+

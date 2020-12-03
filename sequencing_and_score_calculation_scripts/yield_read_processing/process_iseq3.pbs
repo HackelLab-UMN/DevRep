@@ -1,0 +1,36 @@
+#!/bin/bash -l
+#PBS -l walltime=0:30:00,nodes=1:ppn=10,mem=4gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+
+cd ./round3_gp2/plate_seq/iseq3/
+rpi=$PBS_ARRAYID
+
+./usearch32.exe -fastq_mergepairs "RPI1-"$rpi"_S"*"_R1"*".fastq" -fastqout "RPI"$rpi"_merge.fastq" -relabel @
+fwd=(TAGATCGC CTCTCTAT TATCCTCT AGAGTAGA GTAAGGAG ACTGCATA AAGGAGTA CTAAGCCT)
+rev=(TCGCCTTA CTAGTACG TTCTGCCT GCTCAGGA AGGAGTCC CATGCCTA GTAGAGAG CCTCTCTG AGCGTAGC CAGCCTCG TGCCTCTT TCCTCTAC)
+
+# fwdlet=(A B C D E F G H)
+fwdlet=(H G F E D C B A)
+revnum=(1 2 3 4 5 6 7 8 9 10 11 12)
+
+for ((i=0;i<=7;i++));
+do 
+	for ((j=0;j<=11;j++));
+	do
+	(	./usearch32.exe -search_pcr2 "RPI"$rpi"_merge.fastq" -fwdprimer ${fwd[i]} -revprimer ${rev[j]} -strand plus -fastqout "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align.fastq" -maxdiffs 0
+		./usearch32.exe -search_pcr2 "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align.fastq" -fwdprimer TTGGATAGTACGGCTAGC -revprimer GGTGATGGTGGGATCC -strand plus -fastqout "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align2.fastq" -maxdiffs 0
+		./usearch32.exe -fastq_filter "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align2.fastq" -fastaout "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_filter.fasta" -fastq_maxee 1 -fastq_maxns 0 
+		./usearch32.exe -fastx_uniques "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_filter.fasta" -fastaout "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_unique.fasta" -sizeout -relabel "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"." 
+		rm "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align.fastq"
+		rm "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_align2.fastq"
+		rm "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_filter.fasta"
+		./usearch32.exe -unoise3 "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_unique.fasta" -zotus "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_zotus.fasta"
+		./usearch32.exe -usearch_global "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_unique.fasta" -db "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_zotus.fasta" -id 0.97 -strand plus -dbmatched "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_zotus_count.fasta" -sizeout -sizein 
+		rm "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_unique.fasta"
+		rm "RPI"$rpi"_"${fwdlet[i]}${revnum[j]}"_zotus.fasta") &
+	done
+	wait
+done

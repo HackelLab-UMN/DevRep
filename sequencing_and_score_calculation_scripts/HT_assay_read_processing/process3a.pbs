@@ -1,0 +1,11 @@
+#!/bin/bash -l
+#PBS -l walltime=24:00:00,nodes=1:ppn=10,mem=20gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+cd ./round3_gp2/nova2/
+i=$PBS_ARRAYID
+
+./usearch32.exe	 -otutab "./Trial_1/RPI"$i"_Unique.fasta" -zotus zotus_match.fasta -otutabout "./Trial_1/RPI"$i"_otutab.txt" -threads 10
+

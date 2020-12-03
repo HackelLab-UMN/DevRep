@@ -1,0 +1,26 @@
+#!/bin/bash -l
+#PBS -l walltime=1:00:00,nodes=1:ppn=10,mem=10gb
+#PBS -m abe
+#PBS -M golin010@umn.edu
+
+
+module load usearch/11.0_64bit
+cd ./round3_gp2/nova2/
+
+for ((i=1;i<=24;i++));
+do
+	usearch -usearch_global "./Trial_1/RPI"$i"_align.fastq" -db vidur_paratope.fasta -strand plus -id 1.0 -matched "./Trial_1/RPI"$i"_vidur.fasta"
+	usearch -fastx_uniques "./Trial_1/RPI"$i"_vidur.fasta" 
+done
+
+for ((i=1;i<=24;i++));
+do
+	usearch -usearch_global "./Trial_2/RPI"$i"_align.fastq" -db vidur_paratope.fasta -strand plus -id 1.0 -matched "./Trial_2/RPI"$i"_vidur.fasta"
+	usearch -fastx_uniques "./Trial_2/RPI"$i"_vidur.fasta" 
+done
+
+for ((i=1;i<=24;i++));
+do
+	usearch -usearch_global "./Trial_3/RPI"$i"_align.fastq" -db vidur_paratope.fasta -strand plus -id 1.0 -matched "./Trial_3/RPI"$i"_vidur.fasta"
+	usearch -fastx_uniques "./Trial_3/RPI"$i"_vidur.fasta" 
+done
