@@ -4,7 +4,7 @@ import submodels_module as modelbank
 
 def main():
     '''
-    compare test performances when reducing training sample size. This version is for first paper, predicting yield from assays and one-hot encoded sequence. 
+    trains models that includes the observation frequency as an input
     '''
 
 

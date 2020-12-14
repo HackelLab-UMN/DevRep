@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+#dive into the random forest to see if anything is interesting. 
 
 def get_node_depths(tree):
     """

@@ -9,7 +9,7 @@ import load_format_data
 
 def main():
     '''
-    compare test performances when reducing training sample size. This version is for first paper, predicting yield from assays and one-hot encoded sequence. 
+    trains a model to predict yield only using one trial instead of average of 3
     '''
 
 

@@ -1,0 +1,56 @@
+#pymol code
+
+set_color blue5 = [0, 0, 1]
+color red1, resi 35
+select Sites, resi 41+42+43+44+45+46
+select SitesCA, name ca & Sites
+
+show sphere, SitesCA
+
+
+color gray50, resi 
+
+[0.5, 5.8, 6.2, 5.8, 6.0, 6.6, 5.0, 0.5]
+cbar.cmap(norm(-1))
+
+set_color r41 =[1,0,1]
+set_color r42 = [1, 0.62, 0.38]
+set_color r43 =  [1, 0.67, 0.33]
+set_color r43b = [1, 0.62, 0.38]
+set_color r443c = [1, 0.65, 0.35]
+set_color r44 = [1, 0.72, 0.28]
+set_color r45 = [1, 0.53, 0.47]
+set_color r46 = [1,0,1]
+
+color r41, resi 41
+color r42, resi 42
+color r43, resi 43
+color r44, resi 44
+color r45, resi 45
+color r46, resi 46
+
+select loop1, resi 41+42+43+44+45+46
+select loop1ca, name ca & loop1
+show sphere, loop1ca
+
+[4.1, 5.6, 6.1, 5.4, 4.0, 8.8, 4.4, 6.0]
+
+set_color r68 = [1, 0.42, 0.58]
+set_color r69 = [1, 0.6, 0.4]
+set_color r70 = [1, 0.66, 0.34]
+set_color r70b = [1, 0.58, 0.42]
+set_color r70c = [1, 0.41, 0.59]
+set_color r71 = [1, 0.98, 0.02]
+set_color r72 = [1, 0.46, 0.54]
+set_color r73 = [1, 0.65, 0.35]
+
+color r68, resi 68
+color r69, resi 69
+color r70, resi 70
+color r71, resi 71
+color r72, resi 72
+color r73, resi 73
+
+select loop2, resi 68+69+70+71+72+73
+select loop2ca, name ca & loop2
+show sphere, loop2ca

@@ -2,6 +2,10 @@ import sys
 import submodels_module as modelbank
 from itertools import combinations
 
+### 1: 0  8: 7  10:9 
+### 1,8: 16  1,10: 18 8,10: 53
+### 1,8,10: 89
+
 
 def main():
     #creates a list of all pairwise combinations of the 10 assays
@@ -33,7 +37,8 @@ def main():
 
     b=modelbank.assay_to_yield_model(combin_list[toggle_no],arch,1)
     b.cross_validate_model()
-    b.test_model()
+    # b.limit_test_set([1,8,10]) for fig3d or [1,4,5,7,8,9,10] for Fig3c
+    # b.test_model()
     b.plot()
     b.save_predictions() 
 
